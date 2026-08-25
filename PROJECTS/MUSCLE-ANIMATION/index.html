@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Muscle-Based Procedural Animation — an experimental Unreal Engine project exploring physically simulated muscles and machine learning for procedural character locomotion."
+    >
+
+    <title>Muscle-Based Procedural Animation — Corentin Watthez</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/case-study.css">
+</head>
+
+<body>
+
+<header class="site-header">
+    <a class="logo" href="../../index.html">CW<span>.</span></a>
+
+    <nav>
+        <a href="../../index.html#work">Work</a>
+        <a href="../../index.html#about">About</a>
+        <a href="../../index.html#cv">CV</a>
+        <a href="../../index.html#contact">Contact</a>
+    </nav>
+</header>
+
+
+<main>
+
+    <!-- HERO -->
+
+    <section class="case-hero">
+
+        <div class="case-hero-copy">
+
+            <p class="eyebrow">
+                01 / EXPERIMENTAL PROCEDURAL ANIMATION
+            </p>
+
+            <h1>
+                Muscle-Based<br>
+                <span>Procedural Animation</span>
+            </h1>
+
+            <p class="case-intro">
+                Can a character learn to move through physically
+                simulated muscles rather than traditional animation?
+            </p>
+
+            <div class="case-meta">
+
+                <div>
+                    <span>ENGINE</span>
+                    <strong>Unreal Engine 5.6</strong>
+                </div>
+
+                <div>
+                    <span>LANGUAGE</span>
+                    <strong>C++</strong>
+                </div>
+
+                <div>
+                    <span>FOCUS</span>
+                    <strong>Physics · Procedural Animation · ML</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Replace this with your actual video later -->
+
+        <div class="case-hero-video">
+
+            <div class="video-placeholder">
+                <span>PROJECT DEMO</span>
+                <strong>▶</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- QUESTION -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+
+            <span>02 / THE QUESTION</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                What happens when
+                animation becomes
+                a physical problem?
+            </h2>
+
+            <p>
+                Traditional character animation describes how a character
+                should move. For this project, I wanted to explore the
+                opposite approach: give the character a physical body,
+                control it through simulated muscles, and let the movement
+                emerge from the interaction between the controller and
+                the physics simulation.
+            </p>
+
+            <p>
+                The long-term goal is to investigate whether physically
+                plausible procedural animation can be learned rather than
+                explicitly authored.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- SYSTEM OVERVIEW -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+
+            <span>03 / SYSTEM OVERVIEW</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                A loop between
+                learning and physics.
+            </h2>
+
+            <div class="architecture">
+
+                <div class="architecture-node">
+                    <span>01</span>
+                    <strong>Target</strong>
+                    <small>Desired movement</small>
+                </div>
+
+                <div class="architecture-arrow">↓</div>
+
+                <div class="architecture-node">
+                    <span>02</span>
+                    <strong>Learning System</strong>
+                    <small>Generates muscle activations</small>
+                </div>
+
+                <div class="architecture-arrow">↓</div>
+
+                <div class="architecture-node">
+                    <span>03</span>
+                    <strong>Muscle System</strong>
+                    <small>Converts activation into forces</small>
+                </div>
+
+                <div class="architecture-arrow">↓</div>
+
+                <div class="architecture-node">
+                    <span>04</span>
+                    <strong>Physics Simulation</strong>
+                    <small>Produces physical motion</small>
+                </div>
+
+                <div class="architecture-arrow">↓</div>
+
+                <div class="architecture-node">
+                    <span>05</span>
+                    <strong>Reward / Feedback</strong>
+                    <small>Evaluates the result</small>
+                </div>
+
+            </div>
+
+            <p class="architecture-note">
+                The resulting movement feeds back into the learning
+                process, creating an iterative loop between control,
+                physical simulation and evaluation.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- PHYSICS -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+
+            <span>04 / PHYSICS SYSTEM</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Building the body
+                before teaching it to move.
+            </h2>
+
+            <p>
+                Before introducing learning, the character needs a stable
+                physical representation. Each body part has mass and
+                physical constraints, while muscles apply forces that
+                influence the resulting motion.
+            </p>
+
+            <div class="media-block">
+
+                <div class="media-placeholder">
+                    <span>PHYSICS DEMO / SCREENSHOT</span>
+                </div>
+
+            </div>
+
+            <div class="two-column-text">
+
+                <div>
+                    <span class="mini-label">MASS</span>
+                    <p>
+                        Mass distribution influences how forces propagate
+                        through the character and how difficult different
+                        movements are to perform.
+                    </p>
+                </div>
+
+                <div>
+                    <span class="mini-label">CONSTRAINTS</span>
+                    <p>
+                        Joint constraints limit the physically possible
+                        motion and provide the foundation for stable
+                        character behaviour.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- TOOL -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+
+            <span>05 / AUTHORING TOOL</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Making the simulation
+                authorable.
+            </h2>
+
+            <p>
+                A physically simulated character quickly becomes difficult
+                to manage directly through raw data. I therefore built an
+                editor tool to create and manage muscles and mass
+                distributions directly inside Unreal Engine.
+            </p>
+
+            <div class="media-block large">
+
+                <div class="media-placeholder">
+                    <span>MUSCLE AUTHORING TOOL</span>
+                </div>
+
+            </div>
+
+            <div class="feature-grid">
+
+                <div>
+                    <span>01</span>
+                    <h3>Muscle creation</h3>
+                    <p>
+                        Define muscles and associate them with the
+                        character's physical structure.
+                    </p>
+                </div>
+
+                <div>
+                    <span>02</span>
+                    <h3>Mass management</h3>
+                    <p>
+                        Configure and visualize the mass distribution
+                        used by the simulation.
+                    </p>
+                </div>
+
+                <div>
+                    <span>03</span>
+                    <h3>Visualization</h3>
+                    <p>
+                        Make otherwise invisible physical data visible
+                        while authoring and debugging.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- LEARNING -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+
+            <span>06 / LEARNING SYSTEM</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Teaching the system
+                what "good movement" means.
+            </h2>
+
+            <p>
+                The learning system observes the physical state of the
+                character and produces muscle activations. The resulting
+                movement is then evaluated and fed back into the training
+                process.
+            </p>
+
+            <div class="learning-flow">
+
+                <div>OBSERVATION</div>
+                <span>→</span>
+                <div>CONTROLLER</div>
+                <span>→</span>
+                <div>MUSCLE ACTIVATION</div>
+                <span>→</span>
+                <div>PHYSICS</div>
+                <span>→</span>
+                <div>REWARD</div>
+
+            </div>
+
+            <div class="media-block">
+
+                <div class="media-placeholder">
+                    <span>LEARNING / TRAINING DEMO</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- FAILURES -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+
+            <span>07 / EXPERIMENTS</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Things that broke.
+            </h2>
+
+            <p>
+                A large part of the project is understanding why apparently
+                reasonable solutions fail. Instead of hiding these results,
+                I use them to guide the design of the system.
+            </p>
+
+            <div class="experiment">
+
+                <div class="experiment-media">
+                    <span>FAILED EXPERIMENT</span>
+                </div>
+
+                <div>
+                    <span class="mini-label">EXPERIMENT 01</span>
+
+                    <h3>
+                        Unstable locomotion
+                    </h3>
+
+                    <p>
+                        The controller discovered behaviours that were
+                        technically valid but resulted in unstable or
+                        undesirable movement.
+                    </p>
+
+                    <strong>Investigation</strong>
+
+                    <p>
+                        Visualizing forces and physical states helped
+                        identify how the controller was exploiting the
+                        available degrees of freedom.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- CURRENT STATE -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+
+            <span>08 / CURRENT STATE</span>
+
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Where the project
+                stands today.
+            </h2>
+
+            <div class="status-grid">
+
+                <div class="status complete">
+                    <span>✓</span>
+                    <strong>Physics system</strong>
+                    <small>Working</small>
+                </div>
+
+                <div class="status complete">
+                    <span>✓</span>
+                    <strong>Muscle / mass tool</strong>
+                    <small>Working</small>
+                </div>
+
+                <div class="status complete">
+                    <span>✓</span>
+                    <strong>Learning management tool</strong>
+                    <small>Working</small>
+                </div>
+
+                <div class="status complete">
+                    <span>✓</span>
+                    <strong>Basic learning behaviour</strong>
+                    <small>Working</small>
+                </div>
+
+                <div class="status">
+                    <span>→</span>
+                    <strong>Advanced locomotion</strong>
+                    <small>In progress</small>
+                </div>
+
+                <div class="status">
+                    <span>→</span>
+                    <strong>More robust training</strong>
+                    <small>In progress</small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- NEXT -->
+
+    <section class="case-next">
+
+        <p class="eyebrow">09 / WHAT'S NEXT</p>
+
+        <h2>
+            From learning to
+            believable locomotion.
+        </h2>
+
+        <p>
+            The next stage is to improve training stability, refine the
+            reward system and investigate more complex learned behaviours.
+        </p>
+
+        <a class="button" href="../../index.html#work">
+            Back to work <span>↗</span>
+        </a>
+
+    </section>
+
+</main>
+
+
+<footer id="contact">
+
+    <div>
+        <p class="eyebrow">CONTACT</p>
+        <h2>Corentin Watthez</h2>
+    </div>
+
+    <div class="footer-links">
+        <a href="#">GitHub ↗</a>
+        <a href="#">LinkedIn ↗</a>
+        <a href="#">ArtStation ↗</a>
+        <a href="mailto:your@email.com">Email ↗</a>
+    </div>
+
+    <p class="copyright">
+        © 2026 CORentin Watthez
+    </p>
+
+</footer>
+
+</body>
+</html>
