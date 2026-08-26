@@ -192,72 +192,81 @@ footer {
   opacity: .8;
 }
 
-/* pose: dead-hang from a bottom edge, hands meeting near a single grip point */
+/* pose: dead-hang from a bottom edge, traced from a GeoGebra sketch
+   (points A-H, y flipped from GeoGebra's up-positive axis to CSS's down-positive axis;
+   F was given as (1.2, 7.7) but every other point is negative and its segments
+   (k: D-F, l: F-H) mirror E's (i: D-E, j: E-G) exactly, so this uses (1.2, -7.7) to match) */
 .pose-hang {
-  width: 230px;
-  height: 330px;
+  width: 138px;
+  height: 208px;
   transform-origin: top center;
 }
 
-.pose-hang .j1 { left: 109px; top: 39px; }
-.pose-hang .j2 { left: 94px;  top: -2px; }
-.pose-hang .j3 { left: 124px; top: -2px; }
-.pose-hang .j4 { left: 89px;  top: 274px; }
-.pose-hang .j5 { left: 129px; top: 274px; }
-.pose-hang .j6 { left: 109px; top: 164px; }
+.pose-hang .j1 { left: 0;      top: -6px;  } /* A: near hand */
+.pose-hang .j2 { left: 124.8px; top: -6px; } /* B: far hand */
+.pose-hang .j3 { left: 62.4px; top: 46.6px; } /* C: neck */
+.pose-hang .j4 { left: 62.4px; top: 114px;  } /* D: hip */
+.pose-hang .j5 { left: 38.4px; top: 148px;  } /* E: near knee */
+.pose-hang .j6 { left: 86.4px; top: 148px;  } /* F: far knee */
+.pose-hang .j7 { left: 22.4px; top: 194px;  } /* G: near foot */
+.pose-hang .j8 { left: 102.4px; top: 194px; } /* H: far foot */
 
-.pose-hang .b1 { width: 125px;   left: 115px; top: 45px;  transform: rotate(90deg); }
-.pose-hang .b2 { width: 43.7px;  left: 115px; top: 45px;  transform: rotate(-110.1deg); }
-.pose-hang .b3 { width: 43.7px;  left: 115px; top: 45px;  transform: rotate(-69.9deg); }
-.pose-hang .b4 { width: 111.8px; left: 115px; top: 170px; transform: rotate(100.3deg); }
-.pose-hang .b5 { width: 111.8px; left: 115px; top: 170px; transform: rotate(79.7deg); }
-.pose-hang .b6 { width: 30px;    left: 100px; top: 170px; transform: rotate(0deg); }
+.pose-hang .b1 { width: 81.61px; left: 68.4px; top: 52.6px; transform: rotate(-139.89deg); } /* f: C-A, near arm */
+.pose-hang .b2 { width: 81.61px; left: 68.4px; top: 52.6px; transform: rotate(-40.11deg); }  /* g: C-B, far arm */
+.pose-hang .b3 { width: 67.4px;  left: 68.4px; top: 52.6px; transform: rotate(90deg); }      /* h: C-D, spine */
+.pose-hang .b4 { width: 41.62px; left: 68.4px; top: 120px;  transform: rotate(125.22deg); }  /* i: D-E, near thigh */
+.pose-hang .b5 { width: 48.70px; left: 44.4px; top: 154px;  transform: rotate(109.15deg); }  /* j: E-G, near shin */
+.pose-hang .b6 { width: 41.62px; left: 68.4px; top: 120px;  transform: rotate(54.78deg); }   /* k: D-F, far thigh */
+.pose-hang .b7 { width: 48.70px; left: 92.4px; top: 154px;  transform: rotate(70.85deg); }   /* l: F-H, far shin */
 
-/* pose: leaning full-weight into a right-hand edge, one diagonal line from hands to feet */
+/* pose: leaning into a right-hand edge, traced from a GeoGebra sketch
+   (points A-G, y flipped from GeoGebra's up-positive axis to CSS's down-positive axis) */
 .pose-push {
-  width: 150px;
-  height: 130px;
+  width: 178px;
+  height: 122px;
   transform-origin: left center;
 }
 
-.pose-push .j1 { left: 10px;  top: 10px; }
-.pose-push .j2 { left: -4px;  top: 20px; }
-.pose-push .j3 { left: -4px;  top: 36px; }
-.pose-push .j4 { left: 122px; top: 84px; }
-.pose-push .j5 { left: 134px; top: 106px; }
-.pose-push .j6 { left: 72px;  top: 72px; }
+.pose-push .j1 { left: 82.6px; top: 47.6px; } /* A: hip */
+.pose-push .j2 { left: 48.8px; top: 75px;   } /* B: knee */
+.pose-push .j3 { left: 87px;   top: 105px;  } /* C: near foot */
+.pose-push .j4 { left: 159.2px; top: 105px; } /* D: far braced foot */
+.pose-push .j5 { left: -6px;   top: 18.6px; } /* E: lower hand, on the wall */
+.pose-push .j6 { left: -6px;   top: -4px;   } /* F: upper hand, on the wall */
+.pose-push .j7 { left: 44.8px; top: 2.4px;  } /* G: shoulder */
 
-.pose-push .b1 { width: 64.4px; left: 26px; top: 40px; transform: rotate(36.2deg); }
-.pose-push .b2 { width: 27.8px; left: 26px; top: 40px; transform: rotate(-149.7deg); }
-.pose-push .b3 { width: 24.1px; left: 26px; top: 40px; transform: rotate(175.2deg); }
-.pose-push .b4 { width: 51.4px; left: 78px; top: 78px; transform: rotate(13.5deg); }
-.pose-push .b5 { width: 70.7px; left: 78px; top: 78px; transform: rotate(28.8deg); }
-.pose-push .b6 { width: 26px;   left: 16px; top: 16px; transform: rotate(67.4deg); }
+.pose-push .b1 { width: 95.72px; left: 88.6px; top: 53.6px; transform: rotate(36.86deg); }   /* f: A-D, far leg */
+.pose-push .b2 { width: 43.51px; left: 88.6px; top: 53.6px; transform: rotate(140.95deg); }  /* g: A-B, thigh */
+.pose-push .b3 { width: 48.57px; left: 54.8px; top: 81px;   transform: rotate(38.16deg); }   /* h: B-C, shin */
+.pose-push .b4 { width: 58.92px; left: 88.6px; top: 53.6px; transform: rotate(-129.93deg); } /* I: A-G, spine */
+.pose-push .b5 { width: 53.32px; left: 50.8px; top: 8.4px;  transform: rotate(162.28deg); }  /* J: G-E, lower arm */
+.pose-push .b6 { width: 51.2px;  left: 50.8px; top: 8.4px;  transform: rotate(-172.81deg); } /* k: G-F, upper arm */
 
-/* pose: perched on a top edge, knees bent, lower legs hanging down over the front */
+/* pose: perched on a top edge, traced from a GeoGebra sketch
+   (points A-H, y flipped from GeoGebra's up-positive axis to CSS's down-positive axis;
+   point I was left disconnected in the sketch and is omitted here) */
 .pose-sit {
-  width: 120px;
-  height: 185px;
-  transform-origin: bottom center;
+  width: 216px;
+  height: 80px;
+  transform-origin: top center;
 }
 
-.pose-sit .j1 { left: 54px; top: 4px; }
-.pose-sit .j2 { left: 34px; top: 84px; }
-.pose-sit .j3 { left: 74px; top: 84px; }
-.pose-sit .j4 { left: 32px; top: 134px; }
-.pose-sit .j5 { left: 76px; top: 134px; }
-.pose-sit .j6 { left: 24px; top: 172px; }
-.pose-sit .j7 { left: 84px; top: 172px; }
-.pose-sit .j8 { left: 54px; top: 89px; }
+.pose-sit .j1 { left: 24.4px;  top: 14px;   } /* A: near knee */
+.pose-sit .j2 { left: 84.4px;  top: -6px;   } /* B: hip */
+.pose-sit .j3 { left: 69.2px;  top: 20.6px; } /* C: far knee */
+.pose-sit .j4 { left: 0;       top: 61.8px; } /* D: near foot */
+.pose-sit .j5 { left: 60.4px;  top: 67.8px; } /* E: far foot */
+.pose-sit .j6 { left: 182.4px; top: -57.8px;} /* F: shoulder */
+.pose-sit .j7 { left: 144.4px; top: -6px;   } /* G: near hand */
+.pose-sit .j8 { left: 204.4px; top: -6px;   } /* H: far hand */
 
-.pose-sit .b1 { width: 63px;   left: 60px; top: 32px; transform: rotate(90deg); }
-.pose-sit .b2 { width: 20.6px; left: 60px; top: 95px; transform: rotate(-166deg); }
-.pose-sit .b3 { width: 20.6px; left: 60px; top: 95px; transform: rotate(-14deg); }
-.pose-sit .b4 { width: 50.1px; left: 60px; top: 95px; transform: rotate(116.1deg); }
-.pose-sit .b5 { width: 50.1px; left: 60px; top: 95px; transform: rotate(63.9deg); }
-.pose-sit .b6 { width: 22px;   left: 60px; top: 10px; transform: rotate(90deg); }
-.pose-sit .b7 { width: 38.8px; left: 38px; top: 140px; transform: rotate(101.9deg); }
-.pose-sit .b8 { width: 38.8px; left: 82px; top: 140px; transform: rotate(78.1deg); }
+.pose-sit .b1 { width: 53.67px;  left: 6px;     top: 67.8px;  transform: rotate(-62.99deg); }  /* f: D-A, near shin */
+.pose-sit .b2 { width: 63.25px;  left: 30.4px;  top: 20px;    transform: rotate(-18.43deg); }  /* g: A-B, near thigh */
+.pose-sit .b3 { width: 30.64px;  left: 75.2px;  top: 26.6px;  transform: rotate(-60.29deg); }  /* h: C-B, far thigh */
+.pose-sit .b4 { width: 48.01px;  left: 66.4px;  top: 73.8px;  transform: rotate(-79.4deg); }   /* I: E-C, far shin */
+.pose-sit .b5 { width: 110.85px; left: 90.4px;  top: 0;       transform: rotate(-27.85deg); }  /* j: B-F, spine */
+.pose-sit .b6 { width: 59.51px;  left: 188.4px; top: -51.8px; transform: rotate(129.72deg); }  /* k: F-G, near arm */
+.pose-sit .b7 { width: 50.81px;  left: 188.4px; top: -51.8px; transform: rotate(64.35deg); }   /* l: F-H, far arm */
 
 .hero-label {
   position: absolute;
@@ -445,31 +454,32 @@ footer {
   object-fit: cover;
 }
 
-.card-video-wrap {
+.video-frame {
   position: relative;
-  margin-bottom: 110px;
 }
 
-.card-video-wrap video {
-  margin-bottom: 0;
+/* the dangling legs need real clearance below; hands/hips/heads for the other
+   two poses stay inside the video's own footprint, so no baseline margin is needed */
+.video-frame:has(.pose-hang) {
+  margin-bottom: 100px;
 }
 
-.card-video-wrap .pose-hang {
+.video-frame .pose-hang {
   top: 100%;
   left: 50%;
-  transform: translateX(-50%) scale(.28);
+  transform: translateX(-50%) scale(.43);
 }
 
-.card-video-wrap .pose-push {
+.video-frame .pose-push {
   left: 100%;
   top: 50%;
-  transform: translateY(-50%) scale(.3);
+  transform: translateY(-50%) scale(.27);
 }
 
-.card-video-wrap .pose-sit {
-  bottom: 100%;
+.video-frame .pose-sit {
+  top: 0;
   left: 50%;
-  transform: translateX(-50%) scale(.48);
+  transform: translateX(-50%) scale(.37);
 }
 .statement {
   border-top: 1px solid var(--line);
@@ -601,11 +611,11 @@ footer h2 {
     min-height: 430px;
   }
 
-  .card-video-wrap .pose-push {
+  .video-frame .pose-push {
     left: auto;
     right: 0;
     transform-origin: right center;
-    transform: translateY(-50%) scale(.38);
+    transform: translateY(-50%) scale(.32);
   }
 
   .project-grid {
