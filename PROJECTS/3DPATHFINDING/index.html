@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="3D Voxel Pathfinding — a custom Unity navigation toolkit built from scratch with A*, Jobs, Burst and a voxel-based 3D navigation grid.">
+    <title>3D Voxel Pathfinding — Corentin Watthez</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../CSS/style.css">
+    <link rel="stylesheet" href="../../CSS/case-study.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="logo" href="../../index.html">CW<span>.</span></a>
+        <nav><a href="../../index.html#work">Work</a><a href="../../index.html#about">About</a><a
+                href="../../index.html#cv">CV</a><a href="../../index.html#contact">Contact</a></nav>
+    </header>
+    <main>
+        <section class="case-hero">
+            <div class="case-hero-copy">
+                <p class="eyebrow">02 / 3D VOXEL PATHFINDING</p>
+                <h1>3D Voxel<br><span>Pathfinding Tool</span></h1>
+                <p class="case-intro">A custom navigation system for Unity designed to let agents navigate freely
+                    through 3D space — including walls, ceilings and fully volumetric environments.</p>
+                <div class="case-meta">
+                    <div><span>ENGINE</span><strong>Unity 6</strong></div>
+                    <div><span>LANGUAGE</span><strong>C#</strong></div>
+                    <div><span>FOCUS</span><strong>Tooling · A* · Jobs · Burst</strong></div>
+                </div>
+            </div>
+            <div class="media-label">PROJECT VIDEO / DEMO</div>
+            <video autoplay muted loop playsinline>
+                <source src="../../ASSET/VIDEO/Pathfinding demo.mp4" type="video/mp4">Your browser does not support the
+                video tag.
+            </video>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>02 / THE QUESTION</span></div>
+            <div class="case-section-content">
+                <h2>How can an agent navigate in true 3D?</h2>
+                <p>Unity's standard navigation workflow is built around NavMesh surfaces and is primarily suited to
+                    characters moving across floors. That becomes restrictive when a creature needs to climb walls, walk
+                    on ceilings, fly, swim or otherwise move through a volumetric environment.</p>
+                <p>I wanted to build a reusable pathfinding system from scratch that treats the environment as a 3D
+                    volume instead of a mostly horizontal surface.</p>
+                <p>The goal was not only to make it work, but to make the system practical for real-time use:
+                    asynchronous pathfinding, Burst-compiled jobs and a compact representation of the navigable space.
+                </p>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>03 / SYSTEM OVERVIEW</span></div>
+            <div class="case-section-content">
+                <h2>From geometry to a usable path.</h2>
+                <div class="architecture">
+                    <div class="architecture-node"><span>01</span><strong>Scene Geometry</strong><small>Colliders define
+                            the environment</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>02</span><strong>Voxel Bake</strong><small>Samples the 3D
+                            volume</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>03</span><strong>Voxel Grid</strong><small>Stores walkable
+                            states</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>04</span><strong>A* Job</strong><small>Searches the 3D
+                            grid</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>05</span><strong>Agent</strong><small>Follows the resulting
+                            path</small></div>
+                </div>
+                <p class="architecture-note">Baking converts the physical scene into a compact navigable representation.
+                    Pathfinding then operates on that representation inside a Burst-compiled Job.</p>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>04 / VOXEL BAKING</span></div>
+            <div class="case-section-content">
+                <h2>A 3D grid instead of a navigation mesh.</h2>
+                <p>The first step is deciding which parts of the volume an agent can actually occupy. The tool samples
+                    the bake volume as a 3D voxel grid and uses Unity Physics queries to test each voxel against the
+                    environment.</p>
+                <p>A voxel is considered navigable when there is enough free space for the agent and it satisfies the
+                    configured distance-from-wall constraint. This makes the system useful for creatures that need to
+                    remain attached to nearby surfaces rather than simply moving through empty space.</p>
+                <video autoplay muted loop playsinline>
+                    <source src="../../ASSET/VIDEO/Pathfinding show bake.mp4" type="video/mp4">Your browser does not
+                    support the video tag.
+                </video>
+                <div class="two-column-text">
+                    <div><span class="mini-label">VOXEL SIZE</span>
+                        <p>Smaller voxels increase spatial resolution and allow tighter paths around geometry, but also
+                            increase bake time and memory usage.</p>
+                    </div>
+                    <div><span class="mini-label">WALL DISTANCE</span>
+                        <p>A configurable maximum distance from nearby geometry controls how closely an agent can stay
+                            to a wall or other navigable surface.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>05 / DATA STRUCTURE</span></div>
+            <div class="case-section-content">
+                <h2>64 voxels inside one number.</h2>
+                <p>A full 3D grid can become expensive very quickly. Instead of storing one boolean per voxel, the
+                    system packs walkability into 64-bit values.</p>
+                <p>Each grid cell represents a 4 × 4 × 4 block of fine voxels. The 64 walkable states are stored inside
+                    a single <code>ulong</code>, turning the grid into a compact bitfield representation.</p>
+                <div class="architecture">
+                    <div class="architecture-node"><span>4 × 4 × 4</span><strong>64 sub-voxels</strong><small>One coarse
+                            grid cell</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>64 BITS</span><strong>1 × ulong</strong><small>One bit per fine
+                            voxel</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>COMPACT</span><strong>Dense storage</strong><small>Less memory
+                            per voxel state</small></div>
+                </div>
+                <p class="architecture-note">The trade-off is deliberate: the representation is slightly more complex to
+                    access, but it makes large volumetric grids much more practical than a naive boolean-per-voxel
+                    approach.</p>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>06 / A* PATHFINDING</span></div>
+            <div class="case-section-content">
+                <h2>A* running directly in 3D.</h2>
+                <p>The actual path search is implemented from scratch as a Burst-compiled Unity Job. Instead of relying
+                    on a managed collection or repeatedly sorting a list, the open set uses a custom binary min-heap.
+                </p>
+                <p>The search supports all 26 neighbouring directions around a voxel, allowing movement along diagonals
+                    as well as through the three spatial axes.</p>
+                <div class="feature-grid">
+                    <div><span>01</span>
+                        <h3>Binary min-heap</h3>
+                        <p>Keeps the lowest-cost node accessible while maintaining O(log n) insertion and removal.</p>
+                    </div>
+                    <div><span>02</span>
+                        <h3>26 neighbours</h3>
+                        <p>The search is volumetric rather than limited to 4- or 6-directional grid movement.</p>
+                    </div>
+                    <div><span>03</span>
+                        <h3>Euclidean heuristic</h3>
+                        <p>Distance to the goal provides the heuristic used to prioritize promising nodes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>07 / PERFORMANCE</span></div>
+            <div class="case-section-content">
+                <h2>Keeping the search away from the main thread.</h2>
+                <p>Pathfinding can become expensive when multiple agents request paths at the same time. To avoid
+                    blocking gameplay, path requests are scheduled asynchronously through Unity's Job System.</p>
+                <p>The hot path is Burst-compiled and works with native Unity collections. Once the job completes, the
+                    result is returned to the agent through the asynchronous callback workflow.</p>
+                <div class="feature-grid">
+                    <div><span>JOBS</span>
+                        <h3>Asynchronous search</h3>
+                        <p>Pathfinding work can execute outside the main thread, reducing frame-time interruptions.</p>
+                    </div>
+                    <div><span>BURST</span>
+                        <h3>Compiled hot path</h3>
+                        <p>The A* implementation is Burst compiled for performance close to native code.</p>
+                    </div>
+                    <div><span>NATIVE</span>
+                        <h3>Native collections</h3>
+                        <p>The system uses Unity native containers so the data can be safely processed by jobs.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>08 / EDITOR TOOLING</span></div>
+            <div class="case-section-content">
+                <h2>Making a technical system usable.</h2>
+                <p>A pathfinding algorithm is only useful to artists and designers if configuring it is straightforward.
+                    I therefore built custom Unity editor tooling around the system instead of exposing everything as
+                    raw component properties.</p>
+                <p>The bake volume can be resized directly in the Scene view using custom handles, while a dedicated
+                    PathFinding editor window exposes voxel size, wall distance and the bake command.</p>
+                <video autoplay muted loop playsinline>
+                    <source src="../../ASSET/VIDEO/Pathfinding resize bake.mp4" type="video/mp4">Your browser does not
+                    support the video tag.
+                </video>
+                <div class="feature-grid">
+                    <div><span>01</span>
+                        <h3>Scene handles</h3>
+                        <p>Resize and position the bake volume visually, snapped to voxel-size multiples.</p>
+                    </div>
+                    <div><span>02</span>
+                        <h3>Dedicated window</h3>
+                        <p>Configure the bake and inspect the main pathfinding parameters from one place.</p>
+                    </div>
+                    <div><span>03</span>
+                        <h3>Debug visualization</h3>
+                        <p>Gizmos expose walkable voxels and generated paths directly in the Scene view.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>09 / AGENT WORKFLOW</span></div>
+            <div class="case-section-content">
+                <h2>From a target to a moving agent.</h2>
+                <div class="learning-flow">
+                    <div>TARGET</div><span>→</span>
+                    <div>SNAP TO VOXEL</div><span>→</span>
+                    <div>A* JOB</div><span>→</span>
+                    <div>PATH</div><span>→</span>
+                    <div>FOLLOW</div>
+                </div>
+                <p>The example agent snaps its position and target to the nearest walkable voxel, requests a path
+                    asynchronously and follows the returned points at a constant speed.</p>
+                <p>When the target moves, the agent can periodically refresh its path. Orientation follows the current
+                    path direction, with additional geometry awareness used for banking near obstacles.</p>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>10 / DATA PERSISTENCE</span></div>
+            <div class="case-section-content">
+                <h2>Bake once. Reuse the result.</h2>
+                <p>Baking a 3D navigation volume can be expensive, so the generated grid is stored in a ScriptableObject
+                    asset rather than being rebuilt every time the project reloads.</p>
+                <p>The packed voxel data is persisted alongside the voxel size so the baked navigation volume can be
+                    restored without repeating the full physics sampling process.</p>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>11 / CURRENT STATE</span></div>
+            <div class="case-section-content">
+                <h2>A reusable 3D navigation prototype.</h2>
+                <div class="status-grid">
+                    <div class="status complete"><span>✓</span><strong>3D voxel grid</strong><small>Working</small>
+                    </div>
+                    <div class="status complete"><span>✓</span><strong>A* pathfinding</strong><small>Working</small>
+                    </div>
+                    <div class="status complete"><span>✓</span><strong>Jobs + Burst</strong><small>Working</small></div>
+                    <div class="status complete"><span>✓</span><strong>Bit-packed storage</strong><small>Working</small>
+                    </div>
+                    <div class="status complete"><span>✓</span><strong>Custom editor
+                            tooling</strong><small>Working</small></div>
+                    <div class="status complete"><span>✓</span><strong>Agent example</strong><small>Working</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FUTURE DEVELOPMENT -->
+
+        <section class="case-section">
+
+            <div class="case-section-title">
+                <span>12 / FUTURE DEVELOPMENT</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    From a static
+                    navigation grid to a
+                    living navigation system.
+                </h2>
+
+                <p>
+                    The current system is designed around a baked navigation volume.
+                    The next step would be to make the navigation data more modular,
+                    reusable and responsive to changes in the environment.
+                </p>
+
+
+                <div class="feature-grid">
+
+                    <div>
+                        <span>01</span>
+
+                        <h3>
+                            Multiple grids + bridges
+                        </h3>
+
+                        <p>
+                            Split large environments into independent voxel grids
+                            and connect them through explicit bridges. This would
+                            allow different navigation volumes to be updated or
+                            streamed independently while still behaving as one
+                            navigation network.
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <span>02</span>
+
+                        <h3>
+                            Exportable pathfinding splines
+                        </h3>
+
+                        <p>
+                            Convert generated paths into spline data that can be
+                            exported and reused by other systems. This could connect
+                            the pathfinding tool with animation, camera systems,
+                            procedural motion or designer-authored movement.
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <span>03</span>
+
+                        <h3>
+                            Live obstacle reaction
+                        </h3>
+
+                        <p>
+                            Detect changes caused by moving objects and update the
+                            affected navigation data without requiring a complete
+                            world rebake. This would make the system suitable for
+                            environments that change during gameplay.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="future-roadmap">
+
+                    <div class="roadmap-line"></div>
+
+                    <div class="roadmap-item">
+                        <span>NOW</span>
+                        <strong>Static voxel navigation</strong>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <span>NEXT</span>
+                        <strong>Modular connected grids</strong>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <span>THEN</span>
+                        <strong>Reusable path data</strong>
+                    </div>
+
+                    <div class="roadmap-item">
+                        <span>GOAL</span>
+                        <strong>Dynamic navigation</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>13 / WHAT I LEARNED</span></div>
+            <div class="case-section-content">
+                <h2>Designing the data matters as much as the algorithm.</h2>
+                <p>The biggest challenge was not implementing A* itself. It was designing a representation of the world
+                    that could make a volumetric search practical.</p>
+                <p>The project pushed me to think about the whole pipeline: how physical geometry becomes data, how that
+                    data is stored, how the algorithm accesses it, and how the result can be exposed through tooling
+                    without making the system painful to use.</p>
+            </div>
+        </section>
+
+        <section class="case-next">
+
+            <p class="eyebrow">14 / LONG-TERM GOAL</p>
+
+            <h2>
+                A navigation toolkit
+                built for complex 3D worlds.
+            </h2>
+
+            <p>
+                The long-term direction is to evolve the prototype from a static
+                voxel pathfinder into a modular navigation framework capable of
+                handling large, changing and fully three-dimensional environments.
+            </p>
+
+            <a class="button" href="../../index.html#work">
+                Back to work <span>↗</span>
+            </a>
+
+        </section>
+    </main>
+    <footer id="contact">
+        <div>
+            <p class="eyebrow">CONTACT</p>
+            <h2>Corentin Watthez</h2>
+        </div>
+        <div class="footer-links"><a href="#">GitHub ↗</a><a href="#">LinkedIn ↗</a><a href="#">ArtStation ↗</a><a
+                href="mailto:your@email.com">Email ↗</a></div>
+        <p class="copyright">© 2026 CORentin Watthez</p>
+    </footer>
+</body>
+
+</html>

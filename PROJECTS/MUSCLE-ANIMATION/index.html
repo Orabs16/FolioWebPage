@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="description"
-        content="Muscle-Based Procedural Animation — an experimental Unreal Engine project exploring physically simulated muscles and machine learning for procedural character locomotion."
-    >
+    <meta name="description"
+        content="AgentSolver — physically simulated procedural animation in Unreal Engine, combining a custom articulated-body physics solver, muscle authoring and reinforcement learning.">
 
-    <title>Muscle-Based Procedural Animation — Corentin Watthez</title>
+    <title>AgentSolver — Corentin Watthez</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link
         href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
     <link rel="stylesheet" href="../../CSS/style.css">
     <link rel="stylesheet" href="../../CSS/case-study.css">
@@ -46,17 +44,19 @@
         <div class="case-hero-copy">
 
             <p class="eyebrow">
-                01 / EXPERIMENTAL PROCEDURAL ANIMATION
+                01 / AGENTSOLVER
             </p>
 
             <h1>
-                Muscle-Based<br>
+                Physically Simulated<br>
                 <span>Procedural Animation</span>
             </h1>
 
             <p class="case-intro">
-                Can a character learn to move through physically
-                simulated muscles rather than traditional animation?
+                An Unreal Engine plugin exploring reinforcement learning
+                for physically simulated animation, built around a custom
+                articulated-body physics solver and an authoring workflow
+                for a multi-limbed creature.
             </p>
 
             <div class="case-meta">
@@ -73,60 +73,54 @@
 
                 <div>
                     <span>FOCUS</span>
-                    <strong>Physics · Procedural Animation · ML</strong>
+                    <strong>Physics · RL · Tech Animation</strong>
                 </div>
 
             </div>
 
         </div>
 
+        <div class="media-label">PROJECT VIDEO / DEMO</div>
 
-        <!-- Replace this with your actual video later -->
-
-        <div class="case-hero-video">
-
-            <div class="video-placeholder">
-                <span>PROJECT DEMO</span>
-                <strong>▶</strong>
-            </div>
-
-        </div>
+        <video autoplay muted loop playsinline>
+            <source src="../../ASSET/VIDEO/MUTO Falling.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
 
     </section>
 
 
 
-    <!-- QUESTION -->
+    <!-- OVERVIEW -->
 
     <section class="case-section">
 
         <div class="case-section-title">
-
             <span>02 / THE QUESTION</span>
-
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                What happens when
-                animation becomes
-                a physical problem?
+                What if animation
+                was learned from physics?
             </h2>
 
             <p>
-                Traditional character animation describes how a character
-                should move. For this project, I wanted to explore the
-                opposite approach: give the character a physical body,
-                control it through simulated muscles, and let the movement
-                emerge from the interaction between the controller and
-                the physics simulation.
+                Instead of explicitly authoring every movement, I wanted to
+                explore whether a creature could learn to control its own
+                physically simulated body.
             </p>
 
             <p>
-                The long-term goal is to investigate whether physically
-                plausible procedural animation can be learned rather than
-                explicitly authored.
+                The project combines a custom articulated-body physics solver,
+                muscle and mass authoring tools, and reinforcement learning
+                through Unreal Engine's Learning Agents framework.
+            </p>
+
+            <p>
+                The first objective is deliberately simple: teach the creature
+                to remain upright and balanced before attempting locomotion.
             </p>
 
         </div>
@@ -135,70 +129,116 @@
 
 
 
-    <!-- SYSTEM OVERVIEW -->
+    <!-- SYSTEM -->
 
     <section class="case-section dark-section">
 
         <div class="case-section-title">
-
             <span>03 / SYSTEM OVERVIEW</span>
-
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                A loop between
-                learning and physics.
+                Physics, authoring
+                and learning.
             </h2>
 
             <div class="architecture">
 
                 <div class="architecture-node">
                     <span>01</span>
-                    <strong>Target</strong>
-                    <small>Desired movement</small>
+                    <strong>Skeletal Mesh</strong>
+                    <small>52-bone creature</small>
                 </div>
 
-                <div class="architecture-arrow">↓</div>
+                <div class="architecture-arrow">→</div>
 
                 <div class="architecture-node">
                     <span>02</span>
-                    <strong>Learning System</strong>
-                    <small>Generates muscle activations</small>
+                    <strong>Muscle + Mass</strong>
+                    <small>Authored physical profile</small>
                 </div>
 
-                <div class="architecture-arrow">↓</div>
+                <div class="architecture-arrow">→</div>
 
                 <div class="architecture-node">
                     <span>03</span>
-                    <strong>Muscle System</strong>
-                    <small>Converts activation into forces</small>
+                    <strong>Physics Solver</strong>
+                    <small>41 bodies / 68 DOF</small>
                 </div>
 
-                <div class="architecture-arrow">↓</div>
+                <div class="architecture-arrow">→</div>
 
                 <div class="architecture-node">
                     <span>04</span>
-                    <strong>Physics Simulation</strong>
-                    <small>Produces physical motion</small>
+                    <strong>RL Policy</strong>
+                    <small>PPO control</small>
                 </div>
 
-                <div class="architecture-arrow">↓</div>
+                <div class="architecture-arrow">→</div>
 
                 <div class="architecture-node">
                     <span>05</span>
-                    <strong>Reward / Feedback</strong>
-                    <small>Evaluates the result</small>
+                    <strong>Animation</strong>
+                    <small>Learned physical behaviour</small>
                 </div>
 
             </div>
 
             <p class="architecture-note">
-                The resulting movement feeds back into the learning
-                process, creating an iterative loop between control,
-                physical simulation and evaluation.
+                The goal is to create a complete pipeline from an authored
+                skeletal creature to a physical simulation that can eventually
+                learn its own movement.
             </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- TOOL 1 -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+            <span>04 / MUSCLE & MASS AUTHORING</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Turning a skeletal mesh
+                into a physical creature.
+            </h2>
+
+            <p>
+                A real skeletal mesh is not immediately usable by the custom
+                physics solver. I built an editor workflow for defining the
+                mass and muscle properties that connect the animation skeleton
+                to the physical representation.
+            </p>
+
+            <p>
+                Muscles use authored extension/flexion strength curves rather
+                than relying only on a constant torque value, giving the
+                physical model a more useful relationship between joint angle
+                and available force.
+            </p>
+
+            <div class="media-block large">
+
+                <video autoplay muted loop playsinline>
+                    <source src="../../ASSET/VIDEO/Mass Muscle.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+
+                <span class="media-caption">
+                    MUSCLE / MASS AUTHORING TOOL
+                </span>
+
+            </div>
 
         </div>
 
@@ -211,119 +251,55 @@
     <section class="case-section">
 
         <div class="case-section-title">
-
-            <span>04 / PHYSICS SYSTEM</span>
-
+            <span>05 / CUSTOM PHYSICS</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                Building the body
-                before teaching it to move.
+                A physics solver
+                built for batched simulation.
             </h2>
 
             <p>
-                Before introducing learning, the character needs a stable
-                physical representation. Each body part has mass and
-                physical constraints, while muscles apply forces that
-                influence the resulting motion.
+                The training environment needs to simulate many creatures
+                repeatedly. Rather than using a general-purpose constraint
+                setup, I implemented a reduced-coordinate Featherstone
+                Articulated Body Algorithm from scratch in C++.
             </p>
-
-            <div class="media-block">
-
-                <div class="media-placeholder">
-                    <span>PHYSICS DEMO / SCREENSHOT</span>
-                </div>
-
-            </div>
-
-            <div class="two-column-text">
-
-                <div>
-                    <span class="mini-label">MASS</span>
-                    <p>
-                        Mass distribution influences how forces propagate
-                        through the character and how difficult different
-                        movements are to perform.
-                    </p>
-                </div>
-
-                <div>
-                    <span class="mini-label">CONSTRAINTS</span>
-                    <p>
-                        Joint constraints limit the physically possible
-                        motion and provide the foundation for stable
-                        character behaviour.
-                    </p>
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- TOOL -->
-
-    <section class="case-section dark-section">
-
-        <div class="case-section-title">
-
-            <span>05 / AUTHORING TOOL</span>
-
-        </div>
-
-        <div class="case-section-content">
-
-            <h2>
-                Making the simulation
-                authorable.
-            </h2>
 
             <p>
-                A physically simulated character quickly becomes difficult
-                to manage directly through raw data. I therefore built an
-                editor tool to create and manage muscles and mass
-                distributions directly inside Unreal Engine.
+                The current topology contains a floating 6-DOF root followed
+                by 3-DOF ball joints and 1-DOF yaw joints, resulting in
+                <strong>41 bodies and 68 degrees of freedom.</strong>
             </p>
-
-            <div class="media-block large">
-
-                <div class="media-placeholder">
-                    <span>MUSCLE AUTHORING TOOL</span>
-                </div>
-
-            </div>
 
             <div class="feature-grid">
 
                 <div>
                     <span>01</span>
-                    <h3>Muscle creation</h3>
+                    <h3>Reduced coordinates</h3>
                     <p>
-                        Define muscles and associate them with the
-                        character's physical structure.
+                        The articulated body is represented through joint
+                        coordinates rather than independent constrained bodies.
                     </p>
                 </div>
 
                 <div>
                     <span>02</span>
-                    <h3>Mass management</h3>
+                    <h3>Featherstone ABA</h3>
                     <p>
-                        Configure and visualize the mass distribution
-                        used by the simulation.
+                        The solver uses an O(n) articulated-body formulation
+                        without explicitly constructing the full mass matrix.
                     </p>
                 </div>
 
                 <div>
                     <span>03</span>
-                    <h3>Visualization</h3>
+                    <h3>Data-oriented state</h3>
                     <p>
-                        Make otherwise invisible physical data visible
-                        while authoring and debugging.
+                        Simulation state uses a Structure-of-Arrays layout
+                        designed for processing many identical environments.
                     </p>
                 </div>
 
@@ -335,109 +311,399 @@
 
 
 
-    <!-- LEARNING -->
-
-    <section class="case-section">
-
-        <div class="case-section-title">
-
-            <span>06 / LEARNING SYSTEM</span>
-
-        </div>
-
-        <div class="case-section-content">
-
-            <h2>
-                Teaching the system
-                what "good movement" means.
-            </h2>
-
-            <p>
-                The learning system observes the physical state of the
-                character and produces muscle activations. The resulting
-                movement is then evaluated and fed back into the training
-                process.
-            </p>
-
-            <div class="learning-flow">
-
-                <div>OBSERVATION</div>
-                <span>→</span>
-                <div>CONTROLLER</div>
-                <span>→</span>
-                <div>MUSCLE ACTIVATION</div>
-                <span>→</span>
-                <div>PHYSICS</div>
-                <span>→</span>
-                <div>REWARD</div>
-
-            </div>
-
-            <div class="media-block">
-
-                <div class="media-placeholder">
-                    <span>LEARNING / TRAINING DEMO</span>
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- FAILURES -->
+    <!-- OPTIMIZATION -->
 
     <section class="case-section dark-section">
 
         <div class="case-section-title">
-
-            <span>07 / EXPERIMENTS</span>
-
+            <span>06 / BATCHED SIMULATION</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                Things that broke.
+                Thousands of environments.
+                One solver.
             </h2>
 
             <p>
-                A large part of the project is understanding why apparently
-                reasonable solutions fail. Instead of hiding these results,
-                I use them to guide the design of the system.
+                Reinforcement learning becomes expensive when every training
+                environment is simulated independently. The solver therefore
+                processes multiple environments using the same topology and
+                data layout.
             </p>
 
-            <div class="experiment">
+            <p>
+                The hot path includes an AVX2 8-wide SIMD implementation,
+                while the environments are distributed across parallel jobs.
+                A scalar implementation is maintained as a reference for
+                parity checks against the optimized solver.
+            </p>
 
-                <div class="experiment-media">
-                    <span>FAILED EXPERIMENT</span>
+            <div class="feature-grid">
+
+                <div>
+                    <span>AVX2</span>
+                    <h3>8-wide SIMD</h3>
+                    <p>
+                        Identical simulation work is processed across SIMD
+                        lanes to reduce the cost of each physics step.
+                    </p>
                 </div>
 
                 <div>
-                    <span class="mini-label">EXPERIMENT 01</span>
-
-                    <h3>
-                        Unstable locomotion
-                    </h3>
-
+                    <span>2048</span>
+                    <h3>Environments</h3>
                     <p>
-                        The controller discovered behaviours that were
-                        technically valid but resulted in unstable or
-                        undesirable movement.
+                        The batched solver has been validated with up to
+                        2048 parallel environments.
                     </p>
+                </div>
 
-                    <strong>Investigation</strong>
-
+                <div>
+                    <span>TEST</span>
+                    <h3>Scalar reference</h3>
                     <p>
-                        Visualizing forces and physical states helped
-                        identify how the controller was exploiting the
-                        available degrees of freedom.
+                        The optimized solver is checked against a scalar
+                        implementation to catch numerical and logic errors.
                     </p>
                 </div>
 
             </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- CONSTRAINTS -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+            <span>07 / CONSTRAINT SOLVER</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                From individual constraints
+                to a global system.
+            </h2>
+
+            <p>
+                The constraint system evolved during development. An initial
+                per-row Gauss-Seidel approach was replaced by a globally
+                assembled system containing ground contact, joint limits and
+                limb collision constraints.
+            </p>
+
+            <p>
+                The resulting system is solved using Projected SOR. The
+                assembled matrix is constructed without explicitly forming
+                the mass matrix by reusing an existing impulse-response query.
+            </p>
+
+            <div class="architecture">
+
+                <div class="architecture-node">
+                    <span>CONTACT</span>
+                    <strong>Ground</strong>
+                    <small>Contact constraints</small>
+                </div>
+
+                <div class="architecture-node">
+                    <span>LIMIT</span>
+                    <strong>Joints</strong>
+                    <small>Joint-limit constraints</small>
+                </div>
+
+                <div class="architecture-node">
+                    <span>COLLISION</span>
+                    <strong>Limbs</strong>
+                    <small>Self-collision constraints</small>
+                </div>
+
+                <div class="architecture-arrow">→</div>
+
+                <div class="architecture-node">
+                    <span>A = JMJᵀ + R</span>
+                    <strong>Global system</strong>
+                    <small>Projected SOR</small>
+                </div>
+
+            </div>
+
+            <p class="architecture-note">
+                The new approach was not only cleaner conceptually: profiling
+                showed it to be approximately 1.57× cheaper than the previous
+                per-row solver.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- TRAINING -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+            <span>08 / REINFORCEMENT LEARNING</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Learning to stay upright
+                before learning to walk.
+            </h2>
+
+            <p>
+                The learning layer uses Unreal Learning Agents with PPO.
+                The policy receives information about the creature's physical
+                state and produces a normalized action for every controllable
+                degree of freedom.
+            </p>
+
+            <div class="learning-flow">
+
+                <div>PHYSICAL STATE</div>
+                <span>→</span>
+                <div>OBSERVATIONS</div>
+                <span>→</span>
+                <div>PPO POLICY</div>
+                <span>→</span>
+                <div>TORQUES</div>
+                <span>→</span>
+                <div>PHYSICS</div>
+
+            </div>
+
+            <p>
+                Observations currently include torso orientation and velocity,
+                height error, joint positions and velocities, and contact
+                information. The reward encourages survival, upright posture
+                and balance while penalizing excessive torque.
+            </p>
+
+            <p>
+                Locomotion is intentionally not part of the current objective.
+                Standing is the first milestone before introducing more
+                complex behaviours.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- TOOL 2 -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+            <span>09 / TRAINING TOOL</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Making the learning process
+                visible and controllable.
+            </h2>
+
+            <p>
+                I also built an in-engine tool for managing and observing the
+                training process. The goal was to make the otherwise opaque
+                interaction between the simulation and learning system easier
+                to inspect while iterating.
+            </p>
+
+            <div class="media-block large">
+
+                <!-- Replace with your training tool video -->
+                <video autoplay muted loop playsinline>
+                    <source src="../../ASSET/VIDEO/Agent Solver.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+
+                <span class="media-caption">
+                    TRAINING / SIMULATION TOOL
+                </span>
+
+            </div>
+
+            <p>
+                Training runs on a background thread because the Python PPO
+                round-trip can otherwise block the Unreal editor. The
+                visualizer uses a periodic policy snapshot so that observing
+                the creature does not reintroduce the same synchronization
+                problem.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- VALIDATION -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+            <span>10 / VALIDATION</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Don't just make the simulation
+                look stable. Test it.
+            </h2>
+
+            <p>
+                Physics systems can produce plausible-looking results while
+                still being fundamentally wrong. I therefore built a testing
+                workflow around the solver rather than relying only on visual
+                inspection.
+            </p>
+
+            <div class="feature-grid">
+
+                <div>
+                    <span>20+</span>
+                    <h3>Automation tests</h3>
+                    <p>
+                        Permanent tests cover important solver and system
+                        behaviours.
+                    </p>
+                </div>
+
+                <div>
+                    <span>SIMD</span>
+                    <h3>Parity testing</h3>
+                    <p>
+                        The optimized implementation is compared against
+                        the scalar reference.
+                    </p>
+                </div>
+
+                <div>
+                    <span>PHYSICS</span>
+                    <h3>Invariant testing</h3>
+                    <p>
+                        Physical laws such as angular momentum conservation
+                        helped catch errors that tolerance checks missed.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- WAR STORY -->
+
+    <section class="case-section dark-section">
+
+        <div class="case-section-title">
+            <span>11 / DEBUGGING</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                When the creature falls,
+                find out why.
+            </h2>
+
+            <p>
+                A major part of the project became understanding failures that
+                appeared as simple "the creature fell over" problems.
+            </p>
+
+            <p>
+                One particularly important bug came from forward kinematics:
+                the bone rotation offset relative to its parent was being
+                dropped. This caused the creature to spawn in the wrong
+                orientation and led to several follow-up assumptions about
+                root orientation and height.
+            </p>
+
+            <p>
+                Other failures came from incorrect joint conventions, NaN
+                values escaping fall detection, stale state surviving resets,
+                and unit mismatches between Unreal's centimetre-based system
+                and SI-based physics references.
+            </p>
+
+            <p>
+                These failures pushed the project toward a more explicit
+                validation methodology instead of relying on parameter
+                tweaking and visual judgement.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ASSET -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+            <span>12 / CHARACTER ASSET</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                Muto
+            </h2>
+
+            <p>
+                The creature used for the experiments is a reproduction of the
+                Female MUTO from <em>Godzilla (2014)</em>.
+            </p>
+
+            <p>
+                The model was originally obtained from Sketchfab and was
+                created by <strong>AllThingsSaurus</strong>. It is used here
+                solely as a third-party character asset for technical
+                animation and physics demonstrations.
+            </p>
+
+            <div class="asset-credit">
+
+                <span class="mini-label">ASSET CREDIT</span>
+
+                <p>
+                    <strong>Female MUTO</strong><br>
+                    Original creator: AllThingsSaurus<br>
+                    Originally obtained from Sketchfab<br>
+                    Third-party asset used exclusively for technical animation
+                    demonstration.
+                </p>
+
+            </div>
+
+            <p class="architecture-note">
+                The character asset is not presented as my original modeling
+                work. My contribution is the physical simulation, muscle/mass
+                authoring workflow, solver, tooling and learning pipeline
+                built around the character.
+            </p>
 
         </div>
 
@@ -447,60 +713,104 @@
 
     <!-- CURRENT STATE -->
 
-    <section class="case-section">
+    <section class="case-section dark-section">
 
         <div class="case-section-title">
-
-            <span>08 / CURRENT STATE</span>
-
+            <span>13 / CURRENT STATE</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                Where the project
-                stands today.
+                The physics foundation
+                is now stable.
             </h2>
+
+            <p>
+                The current physics system can sustain 50 seconds of ground
+                contact with the 41-body creature without divergence.
+            </p>
 
             <div class="status-grid">
 
                 <div class="status complete">
                     <span>✓</span>
-                    <strong>Physics system</strong>
+                    <strong>Custom ABA solver</strong>
                     <small>Working</small>
                 </div>
 
                 <div class="status complete">
                     <span>✓</span>
-                    <strong>Muscle / mass tool</strong>
+                    <strong>Muscle / mass authoring</strong>
                     <small>Working</small>
                 </div>
 
                 <div class="status complete">
                     <span>✓</span>
-                    <strong>Learning management tool</strong>
+                    <strong>Batched simulation</strong>
+                    <small>Validated to 2048 environments</small>
+                </div>
+
+                <div class="status complete">
+                    <span>✓</span>
+                    <strong>AVX2 SIMD</strong>
                     <small>Working</small>
                 </div>
 
                 <div class="status complete">
                     <span>✓</span>
-                    <strong>Basic learning behaviour</strong>
-                    <small>Working</small>
+                    <strong>RL integration</strong>
+                    <small>Integrated</small>
                 </div>
 
                 <div class="status">
                     <span>→</span>
-                    <strong>Advanced locomotion</strong>
-                    <small>In progress</small>
-                </div>
-
-                <div class="status">
-                    <span>→</span>
-                    <strong>More robust training</strong>
-                    <small>In progress</small>
+                    <strong>Learned standing</strong>
+                    <small>Next major milestone</small>
                 </div>
 
             </div>
+
+            <p class="architecture-note">
+                The complete combination of physics, topology, contacts,
+                reward and observations has not yet produced a demonstrated
+                standing policy. This is the next major validation step.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- WHAT I LEARNED -->
+
+    <section class="case-section">
+
+        <div class="case-section-title">
+            <span>14 / WHAT I LEARNED</span>
+        </div>
+
+        <div class="case-section-content">
+
+            <h2>
+                The hard part was not
+                just writing the solver.
+            </h2>
+
+            <p>
+                Building the project taught me that technical animation sits
+                between several disciplines. The system needs to make sense
+                mathematically, behave physically, remain fast enough to
+                simulate, and still be controllable through useful tools.
+            </p>
+
+            <p>
+                More importantly, I learned to treat debugging as an
+                experimental process: formulate a hypothesis, design a test
+                that can actually distinguish it, and only then change the
+                system.
+            </p>
 
         </div>
 
@@ -510,18 +820,25 @@
 
     <!-- NEXT -->
 
-    <section class="case-next">
+    <section class="case-next dark-section">
 
-        <p class="eyebrow">09 / WHAT'S NEXT</p>
+        <p class="eyebrow">15 / WHAT'S NEXT</p>
 
         <h2>
-            From learning to
-            believable locomotion.
+            From standing
+            to locomotion.
         </h2>
 
         <p>
-            The next stage is to improve training stability, refine the
-            reward system and investigate more complex learned behaviours.
+            The immediate goal is to demonstrate a stable learned standing
+            behaviour. From there, the learning objective can progress toward
+            weight shifting, stepping and eventually locomotion.
+        </p>
+
+        <p>
+            A second direction is runtime deployment, connecting the training
+            representation to Unreal's production-side systems through Chaos
+            and Control Rig.
         </p>
 
         <a class="button" href="../../index.html#work">
@@ -548,7 +865,7 @@
     </div>
 
     <p class="copyright">
-        © 2026 CORentin Watthez
+        © 2026 Corentin Watthez
     </p>
 
 </footer>

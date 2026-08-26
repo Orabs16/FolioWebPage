@@ -171,10 +171,8 @@ footer {
 
 .skeleton {
   position: absolute;
-  inset: 0;
-  width: 230px;
-  height: 330px;
-  margin: auto;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .joint {
@@ -186,13 +184,6 @@ footer {
   box-shadow: 0 0 18px rgba(85,214,255,.45);
 }
 
-.j1 { left: 109px; top: 20px; }
-.j2 { left: 70px; top: 95px; }
-.j3 { left: 148px; top: 95px; }
-.j4 { left: 91px; top: 170px; }
-.j5 { left: 129px; top: 170px; }
-.j6 { left: 110px; top: 270px; }
-
 .bone {
   position: absolute;
   height: 2px;
@@ -201,12 +192,72 @@ footer {
   opacity: .8;
 }
 
-.b1 { width: 85px; left: 115px; top: 29px; transform: rotate(118deg); }
-.b2 { width: 85px; left: 115px; top: 29px; transform: rotate(62deg); }
-.b3 { width: 80px; left: 75px; top: 104px; transform: rotate(72deg); }
-.b4 { width: 80px; left: 153px; top: 104px; transform: rotate(108deg); }
-.b5 { width: 100px; left: 96px; top: 179px; transform: rotate(84deg); }
-.b6 { width: 100px; left: 134px; top: 179px; transform: rotate(96deg); }
+/* pose: dead-hang from a bottom edge, hands meeting near a single grip point */
+.pose-hang {
+  width: 230px;
+  height: 330px;
+  transform-origin: top center;
+}
+
+.pose-hang .j1 { left: 109px; top: 39px; }
+.pose-hang .j2 { left: 94px;  top: -2px; }
+.pose-hang .j3 { left: 124px; top: -2px; }
+.pose-hang .j4 { left: 89px;  top: 274px; }
+.pose-hang .j5 { left: 129px; top: 274px; }
+.pose-hang .j6 { left: 109px; top: 164px; }
+
+.pose-hang .b1 { width: 125px;   left: 115px; top: 45px;  transform: rotate(90deg); }
+.pose-hang .b2 { width: 43.7px;  left: 115px; top: 45px;  transform: rotate(-110.1deg); }
+.pose-hang .b3 { width: 43.7px;  left: 115px; top: 45px;  transform: rotate(-69.9deg); }
+.pose-hang .b4 { width: 111.8px; left: 115px; top: 170px; transform: rotate(100.3deg); }
+.pose-hang .b5 { width: 111.8px; left: 115px; top: 170px; transform: rotate(79.7deg); }
+.pose-hang .b6 { width: 30px;    left: 100px; top: 170px; transform: rotate(0deg); }
+
+/* pose: leaning full-weight into a right-hand edge, one diagonal line from hands to feet */
+.pose-push {
+  width: 150px;
+  height: 130px;
+  transform-origin: left center;
+}
+
+.pose-push .j1 { left: 10px;  top: 10px; }
+.pose-push .j2 { left: -4px;  top: 20px; }
+.pose-push .j3 { left: -4px;  top: 36px; }
+.pose-push .j4 { left: 122px; top: 84px; }
+.pose-push .j5 { left: 134px; top: 106px; }
+.pose-push .j6 { left: 72px;  top: 72px; }
+
+.pose-push .b1 { width: 64.4px; left: 26px; top: 40px; transform: rotate(36.2deg); }
+.pose-push .b2 { width: 27.8px; left: 26px; top: 40px; transform: rotate(-149.7deg); }
+.pose-push .b3 { width: 24.1px; left: 26px; top: 40px; transform: rotate(175.2deg); }
+.pose-push .b4 { width: 51.4px; left: 78px; top: 78px; transform: rotate(13.5deg); }
+.pose-push .b5 { width: 70.7px; left: 78px; top: 78px; transform: rotate(28.8deg); }
+.pose-push .b6 { width: 26px;   left: 16px; top: 16px; transform: rotate(67.4deg); }
+
+/* pose: perched on a top edge, knees bent, lower legs hanging down over the front */
+.pose-sit {
+  width: 120px;
+  height: 185px;
+  transform-origin: bottom center;
+}
+
+.pose-sit .j1 { left: 54px; top: 4px; }
+.pose-sit .j2 { left: 34px; top: 84px; }
+.pose-sit .j3 { left: 74px; top: 84px; }
+.pose-sit .j4 { left: 32px; top: 134px; }
+.pose-sit .j5 { left: 76px; top: 134px; }
+.pose-sit .j6 { left: 24px; top: 172px; }
+.pose-sit .j7 { left: 84px; top: 172px; }
+.pose-sit .j8 { left: 54px; top: 89px; }
+
+.pose-sit .b1 { width: 63px;   left: 60px; top: 32px; transform: rotate(90deg); }
+.pose-sit .b2 { width: 20.6px; left: 60px; top: 95px; transform: rotate(-166deg); }
+.pose-sit .b3 { width: 20.6px; left: 60px; top: 95px; transform: rotate(-14deg); }
+.pose-sit .b4 { width: 50.1px; left: 60px; top: 95px; transform: rotate(116.1deg); }
+.pose-sit .b5 { width: 50.1px; left: 60px; top: 95px; transform: rotate(63.9deg); }
+.pose-sit .b6 { width: 22px;   left: 60px; top: 10px; transform: rotate(90deg); }
+.pose-sit .b7 { width: 38.8px; left: 38px; top: 140px; transform: rotate(101.9deg); }
+.pose-sit .b8 { width: 38.8px; left: 82px; top: 140px; transform: rotate(78.1deg); }
 
 .hero-label {
   position: absolute;
@@ -253,7 +304,18 @@ footer {
 }
 
 .project-media {
-  min-height: 650px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 650px;
+  aspect-ratio: 16 / 9;
+}
+
+.project-media video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .placeholder-media,
@@ -373,6 +435,42 @@ footer {
   margin: 12px 0;
 }
 
+
+.project-card video {
+  width: 100%;
+  max-width: 650px;
+  aspect-ratio: 16 / 9;
+  display: block;
+  margin-bottom: 28px;
+  object-fit: cover;
+}
+
+.card-video-wrap {
+  position: relative;
+  margin-bottom: 110px;
+}
+
+.card-video-wrap video {
+  margin-bottom: 0;
+}
+
+.card-video-wrap .pose-hang {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) scale(.28);
+}
+
+.card-video-wrap .pose-push {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%) scale(.3);
+}
+
+.card-video-wrap .pose-sit {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) scale(.48);
+}
 .statement {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
@@ -503,8 +601,11 @@ footer h2 {
     min-height: 430px;
   }
 
-  .project-media {
-    min-height: 430px;
+  .card-video-wrap .pose-push {
+    left: auto;
+    right: 0;
+    transform-origin: right center;
+    transform: translateY(-50%) scale(.38);
   }
 
   .project-grid {
