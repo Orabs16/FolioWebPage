@@ -19,6 +19,7 @@
 
     <link rel="stylesheet" href="../../CSS/style.css">
     <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
 </head>
 
 <body>
@@ -44,19 +45,19 @@
         <div class="case-hero-copy">
 
             <p class="eyebrow">
-                01 / AGENTSOLVER
+                AGENTSOLVER · UNREAL ENGINE 5.6
             </p>
 
             <h1>
-                Physically Simulated<br>
-                <span>Procedural Animation</span>
+                Muscles instead<br>
+                <span>of keyframes.</span>
             </h1>
 
             <p class="case-intro">
-                An Unreal Engine plugin exploring reinforcement learning
-                for physically simulated animation, built around a custom
-                articulated-body physics solver and an authoring workflow
-                for a multi-limbed creature.
+                It can't stand up yet. But after a long stretch where every
+                single run ended in a heap on the floor, I'm finally starting
+                to see real results come out of the training — and that part
+                is genuinely exciting.
             </p>
 
             <div class="case-meta">
@@ -80,21 +81,14 @@
 
         </div>
 
-        <div class="media-label">PROJECT VIDEO / DEMO</div>
+        <div class="media-label">41 BODIES · 68 DOF · FALLING WITH GREAT PRECISION</div>
 
         <div class="video-frame">
             <video autoplay muted loop playsinline>
                 <source src="../../ASSET/VIDEO/MUTO Falling.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <div class="skeleton pose-sit">
-                <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-                <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-                <i class="joint j7"></i><i class="joint j8"></i>
-                <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-                <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-                <i class="bone b7"></i>
-            </div>
+            <svg class="stickman pose-sit"></svg>
         </div>
 
     </section>
@@ -106,31 +100,40 @@
     <section class="case-section">
 
         <div class="case-section-title">
-            <span>02 / THE QUESTION</span>
+            <span>// 02 · why bother</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                What if animation
-                was learned from physics?
+                What if I stopped
+                authoring the movement?
             </h2>
 
             <p>
-                Instead of explicitly authoring every movement, I wanted to
-                explore whether a creature could learn to control its own
-                physically simulated body.
+                Hand animation is boring. Not the result — the process. You
+                decide, frame by frame, exactly what a body does, and the body
+                never once surprises you. You already know how it ends, because
+                you're the one typing it.
             </p>
 
             <p>
-                The project combines a custom articulated-body physics solver,
-                muscle and mass authoring tools, and reinforcement learning
-                through Unreal Engine's Learning Agents framework.
+                So I wanted to find out what happens if I stop deciding. Give a
+                creature muscles, give it physics, and let it work the rest out
+                on its own.
             </p>
 
             <p>
-                The first objective is deliberately simple: teach the creature
-                to remain upright and balanced before attempting locomotion.
+                That turned out to need three things I didn't have: a physics
+                solver fast enough to train against, a way to author muscles onto
+                a skeletal mesh, and an RL setup that doesn't fall apart. So I
+                built all three.
+            </p>
+
+            <p>
+                The first goal is deliberately unglamorous: stand up. Not walk,
+                not run — just stay upright. Everything below is what it took to
+                get to the point where that's even a fair question to ask.
             </p>
 
         </div>
@@ -144,7 +147,7 @@
     <section class="case-section dark-section">
 
         <div class="case-section-title">
-            <span>03 / SYSTEM OVERVIEW</span>
+            <span>// 03 · the shape of it</span>
         </div>
 
         <div class="case-section-content">
@@ -197,9 +200,8 @@
             </div>
 
             <p class="architecture-note">
-                The goal is to create a complete pipeline from an authored
-                skeletal creature to a physical simulation that can eventually
-                learn its own movement.
+                Five boxes. Each one took considerably longer than the arrow
+                between them suggests.
             </p>
 
         </div>
@@ -210,10 +212,10 @@
 
     <!-- TOOL 1 -->
 
-    <section class="case-section dark-section">
+    <section class="case-section">
 
         <div class="case-section-title">
-            <span>04 / MUSCLE & MASS AUTHORING</span>
+            <span>// 04 · giving it muscles</span>
         </div>
 
         <div class="case-section-content">
@@ -224,17 +226,19 @@
             </h2>
 
             <p>
-                A real skeletal mesh is not immediately usable by the custom
-                physics solver. I built an editor workflow for defining the
-                mass and muscle properties that connect the animation skeleton
-                to the physical representation.
+                A skeletal mesh knows where its bones are. It has no idea what
+                any of them weigh, or how hard they can pull. My solver needs
+                both, so I built an editor workflow for painting mass and muscle
+                onto the rig.
             </p>
 
             <p>
-                Muscles use authored extension/flexion strength curves rather
-                than relying only on a constant torque value, giving the
-                physical model a more useful relationship between joint angle
-                and available force.
+                The bit I care about: muscles use authored extension/flexion
+                strength curves, not one constant torque value. Real muscle is
+                weakest at the ends of its range — try holding a dumbbell with
+                your arm fully straight versus at 90°. A single torque number
+                throws that away and gives you a creature with the same strength
+                in every pose, which looks exactly as wrong as it sounds.
             </p>
 
             <div class="video-frame">
@@ -252,13 +256,7 @@
 
                 </div>
 
-                <div class="skeleton pose-push">
-                    <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-                    <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-                    <i class="joint j7"></i>
-                    <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-                    <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-                </div>
+                <svg class="stickman pose-push"></svg>
 
             </div>
 
@@ -270,10 +268,10 @@
 
     <!-- PHYSICS -->
 
-    <section class="case-section">
+    <section class="case-section dark-section">
 
         <div class="case-section-title">
-            <span>05 / CUSTOM PHYSICS</span>
+            <span>// 05 · writing my own solver</span>
         </div>
 
         <div class="case-section-content">
@@ -284,16 +282,20 @@
             </h2>
 
             <p>
-                The training environment needs to simulate many creatures
-                repeatedly. Rather than using a general-purpose constraint
-                setup, I implemented a reduced-coordinate Featherstone
+                I could have used the engine's constraint solver. But training
+                means simulating the same creature thousands of times over, and
+                a general-purpose solver spends most of its budget on generality
+                I don't need. So I wrote a reduced-coordinate Featherstone
                 Articulated Body Algorithm from scratch in C++.
             </p>
 
             <p>
-                The current topology contains a floating 6-DOF root followed
-                by 3-DOF ball joints and 1-DOF yaw joints, resulting in
-                <strong>41 bodies and 68 degrees of freedom.</strong>
+                Featherstone is one of those algorithms that feels like a magic
+                trick the first time it works: it gets you forward dynamics in
+                O(n) without ever building the mass matrix — three sweeps over
+                the tree and you're done. The current topology is a floating 6-DOF root,
+                then 3-DOF ball joints and 1-DOF yaw joints —
+                <strong>41 bodies, 68 degrees of freedom.</strong>
             </p>
 
             <div class="feature-grid">
@@ -335,10 +337,10 @@
 
     <!-- OPTIMIZATION -->
 
-    <section class="case-section dark-section">
+    <section class="case-section">
 
         <div class="case-section-title">
-            <span>06 / BATCHED SIMULATION</span>
+            <span>// 06 · 2048 at once</span>
         </div>
 
         <div class="case-section-content">
@@ -349,17 +351,26 @@
             </h2>
 
             <p>
-                Reinforcement learning becomes expensive when every training
-                environment is simulated independently. The solver therefore
-                processes multiple environments using the same topology and
-                data layout.
+                Here's the thing about RL: it wants an obscene number of
+                simulated seconds. Running environments one at a time is
+                hopeless. But every environment has the <em>identical</em>
+                topology — same bones, same joints, same everything — which
+                means the work is the same instruction applied to different
+                numbers. Which is exactly what SIMD is for.
             </p>
 
             <p>
-                The hot path includes an AVX2 8-wide SIMD implementation,
-                while the environments are distributed across parallel jobs.
-                A scalar implementation is maintained as a reference for
-                parity checks against the optimized solver.
+                So the hot path is AVX2, eight creatures per register, with the
+                whole batch spread across parallel jobs. The trick itself is
+                very cool. Working with it was, honestly, a pain — SIMD bugs
+                don't crash. One lane quietly holds a wrong number and
+                everything carries on as if nothing happened, so you find out
+                a week later when the training makes no sense.
+            </p>
+
+            <p>
+                Which is why the boring scalar version never got deleted. When
+                the two disagree, the fast one is wrong.
             </p>
 
             <div class="feature-grid">
@@ -386,8 +397,8 @@
                     <span>TEST</span>
                     <h3>Scalar reference</h3>
                     <p>
-                        The optimized solver is checked against a scalar
-                        implementation to catch numerical and logic errors.
+                        Slow, obvious, and correct. When the fast one disagrees
+                        with it, the fast one is wrong.
                     </p>
                 </div>
 
@@ -401,10 +412,10 @@
 
     <!-- CONSTRAINTS -->
 
-    <section class="case-section">
+    <section class="case-section dark-section">
 
         <div class="case-section-title">
-            <span>07 / CONSTRAINT SOLVER</span>
+            <span>// 07 · the rewrite that paid off</span>
         </div>
 
         <div class="case-section-content">
@@ -415,16 +426,19 @@
             </h2>
 
             <p>
-                The constraint system evolved during development. An initial
-                per-row Gauss-Seidel approach was replaced by a globally
-                assembled system containing ground contact, joint limits and
-                limb collision constraints.
+                My first constraint solver went row by row, Gauss-Seidel style.
+                It worked, in the sense that it produced numbers. It also meant
+                every constraint was solved in ignorance of the others, and a
+                foot on the ground had no idea a knee was at its limit.
             </p>
 
             <p>
-                The resulting system is solved using Projected SOR. The
-                assembled matrix is constructed without explicitly forming
-                the mass matrix by reusing an existing impulse-response query.
+                So I threw it out and assembled the whole thing globally —
+                ground contacts, joint limits and limb self-collisions in one
+                system, solved with Projected SOR. The neat part is that I never
+                have to form the mass matrix to build it: I already had an
+                impulse-response query lying around from the ABA, and that's
+                exactly what each entry of <code>A = JM⁻¹Jᵀ + R</code> needs.
             </p>
 
             <div class="architecture">
@@ -450,7 +464,7 @@
                 <div class="architecture-arrow">→</div>
 
                 <div class="architecture-node">
-                    <span>A = JMJᵀ + R</span>
+                    <span>A = JM⁻¹Jᵀ + R</span>
                     <strong>Global system</strong>
                     <small>Projected SOR</small>
                 </div>
@@ -458,9 +472,9 @@
             </div>
 
             <p class="architecture-note">
-                The new approach was not only cleaner conceptually: profiling
-                showed it to be approximately 1.57× cheaper than the previous
-                per-row solver.
+                I expected the rewrite to cost me performance in exchange for
+                correctness. Profiler said 1.57× <em>cheaper</em> than the
+                per-row version. I'll take it.
             </p>
 
         </div>
@@ -471,10 +485,10 @@
 
     <!-- TRAINING -->
 
-    <section class="case-section dark-section">
+    <section class="case-section">
 
         <div class="case-section-title">
-            <span>08 / REINFORCEMENT LEARNING</span>
+            <span>// 08 · letting it learn</span>
         </div>
 
         <div class="case-section-content">
@@ -506,16 +520,18 @@
             </div>
 
             <p>
-                Observations currently include torso orientation and velocity,
-                height error, joint positions and velocities, and contact
-                information. The reward encourages survival, upright posture
-                and balance while penalizing excessive torque.
+                Observations: torso orientation and velocity, height error,
+                joint positions and velocities, contacts. The reward says stay
+                alive, stay upright, stay balanced, and stop flailing — that
+                last one is a torque penalty, and without it you get a creature
+                that solves standing by vibrating.
             </p>
 
             <p>
-                Locomotion is intentionally not part of the current objective.
-                Standing is the first milestone before introducing more
-                complex behaviours.
+                No locomotion in the objective. None. It is very tempting to
+                skip ahead to walking, and every time I'm tempted, the creature
+                plants its face into the ground and reminds me that I can't yet
+                prove it can even hold still.
             </p>
 
         </div>
@@ -529,21 +545,28 @@
     <section class="case-section dark-section">
 
         <div class="case-section-title">
-            <span>09 / TRAINING TOOL</span>
+            <span>// 09 · watching it learn</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                Making the learning process
-                visible and controllable.
+                Debugging from raw
+                numbers is a nightmare.
             </h2>
 
             <p>
-                I also built an in-engine tool for managing and observing the
-                training process. The goal was to make the otherwise opaque
-                interaction between the simulation and learning system easier
-                to inspect while iterating.
+                Training gives you a column of floats. Reward up, reward down.
+                Working out <em>why</em> from that is genuinely awful — you end
+                up staring at a log file trying to imagine a creature, and you
+                are always imagining the wrong one.
+            </p>
+
+            <p>
+                So I built an in-engine tool to just watch the thing. Half of
+                what looked like a mysterious reward collapse turned out to be
+                completely obvious the second I could see the creature doing
+                something stupid.
             </p>
 
             <div class="video-frame">
@@ -562,23 +585,17 @@
 
                 </div>
 
-                <div class="skeleton pose-hang">
-                    <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-                    <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-                    <i class="joint j7"></i><i class="joint j8"></i>
-                    <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-                    <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-                    <i class="bone b7"></i>
-                </div>
+                <svg class="stickman pose-hang"></svg>
 
             </div>
 
             <p>
-                Training runs on a background thread because the Python PPO
-                round-trip can otherwise block the Unreal editor. The
-                visualizer uses a periodic policy snapshot so that observing
-                the creature does not reintroduce the same synchronization
-                problem.
+                Training runs on a background thread, because the Python PPO
+                round-trip will happily freeze the whole Unreal editor otherwise.
+                Then the visualiser nearly reintroduced the exact same stall by
+                reaching into the live policy every frame — so it takes periodic
+                snapshots instead. Watching the creature shouldn't be allowed to
+                slow down the creature.
             </p>
 
         </div>
@@ -592,21 +609,37 @@
     <section class="case-section">
 
         <div class="case-section-title">
-            <span>10 / VALIDATION</span>
+            <span>// 10 · proving it is not lying to me</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                Don't just make the simulation
-                look stable. Test it.
+                Every fix used to quietly
+                break two older ones.
             </h2>
 
             <p>
-                Physics systems can produce plausible-looking results while
-                still being fundamentally wrong. I therefore built a testing
-                workflow around the solver rather than relying only on visual
-                inspection.
+                This was the loop I kept falling into: change something, fix the
+                thing in front of me, silently break something I'd already fixed
+                last week, and only notice much later once three of those had
+                stacked up and the whole thing was on fire. Then I get to work
+                out which of the last twenty changes did it. Not fun.
+            </p>
+
+            <p>
+                A physics system makes that worse, because a broken change still
+                produces motion that looks perfectly convincing. Your eyes will
+                cheerfully sign off on nonsense. So now there are tests, they run
+                on their own, and I find out I've made a mistake in seconds
+                instead of a fortnight.
+            </p>
+
+            <p>
+                The one I'm proudest of is invariant testing. Angular momentum
+                has to be conserved whether or not the result looks nice, so I
+                assert on that rather than on my own judgement — and it has
+                caught things no tolerance check would ever have flagged.
             </p>
 
             <div class="feature-grid">
@@ -633,8 +666,8 @@
                     <span>PHYSICS</span>
                     <h3>Invariant testing</h3>
                     <p>
-                        Physical laws such as angular momentum conservation
-                        helped catch errors that tolerance checks missed.
+                        Angular momentum doesn't care about my opinion of how
+                        the sim looks. Best bug-catcher I have.
                     </p>
                 </div>
 
@@ -651,40 +684,58 @@
     <section class="case-section dark-section">
 
         <div class="case-section-title">
-            <span>11 / DEBUGGING</span>
+            <span>// 11 · things that ate whole days</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                When the creature falls,
-                find out why.
+                A field guide to
+                "it fell over again".
             </h2>
 
             <p>
-                A major part of the project became understanding failures that
-                appeared as simple "the creature fell over" problems.
+                Every single bug in this project presents identically: the
+                creature falls over. That's the whole error message. Here are
+                the ones that cost me the most.
             </p>
 
             <p>
-                One particularly important bug came from forward kinematics:
-                the bone rotation offset relative to its parent was being
-                dropped. This caused the creature to spawn in the wrong
-                orientation and led to several follow-up assumptions about
-                root orientation and height.
+                <strong>The forward kinematics one.</strong> I was dropping the
+                bone's rotation offset relative to its parent. The creature
+                spawned rotated wrong, so I "fixed" its root orientation. Then
+                its height looked wrong, so I "fixed" that too. Two wrong
+                assumptions stacked on one real bug, and by the time I found the
+                actual cause I had to unpick both of them. Lesson filed
+                permanently.
             </p>
 
             <p>
-                Other failures came from incorrect joint conventions, NaN
-                values escaping fall detection, stale state surviving resets,
-                and unit mismatches between Unreal's centimetre-based system
-                and SI-based physics references.
+                <strong>The NaN that got away.</strong> Fall detection compared
+                against a threshold. NaN compares false against everything, so a
+                diverged creature sailed straight past the check and kept
+                training on garbage. Nothing crashed. It just quietly learned
+                from nonsense.
             </p>
 
             <p>
-                These failures pushed the project toward a more explicit
-                validation methodology instead of relying on parameter
-                tweaking and visual judgement.
+                <strong>The units.</strong> Unreal thinks in centimetres. Every
+                physics paper I was working from thinks in metres. Guess how
+                that goes.
+            </p>
+
+            <p>
+                <strong>Stale state surviving a reset,</strong> and joint
+                conventions that were wrong in a way that still looked plausible
+                — those two rounded it out.
+            </p>
+
+            <p>
+                What actually changed, after all that, was how I debug. I stopped
+                nudging parameters until it looked better. Now I write down what
+                I think is wrong, work out what test would distinguish it from
+                the alternatives, run <em>that</em>, and only then touch the code.
+                Slower per attempt. Enormously faster overall.
             </p>
 
         </div>
@@ -698,7 +749,7 @@
     <section class="case-section">
 
         <div class="case-section-title">
-            <span>12 / CHARACTER ASSET</span>
+            <span>// 12 · credit where it is due</span>
         </div>
 
         <div class="case-section-content">
@@ -734,10 +785,16 @@
             </div>
 
             <p class="architecture-note">
-                The character asset is not presented as my original modeling
-                work. My contribution is the physical simulation, muscle/mass
-                authoring workflow, solver, tooling and learning pipeline
-                built around the character.
+                To be clear about what's mine: I did not model this. I did rig
+                and skin it myself, and everything around it — the physics,
+                the muscles, the tools, the learning — is mine too.
+            </p>
+
+            <p class="architecture-note">
+                And I picked a big multi-limbed monster for the least technical
+                reason possible: I'd rather work on something fantastical than
+                on yet another human biped. Creatures are more fun. That it
+                also makes the solver work harder is a happy accident.
             </p>
 
         </div>
@@ -751,19 +808,20 @@
     <section class="case-section dark-section">
 
         <div class="case-section-title">
-            <span>13 / CURRENT STATE</span>
+            <span>// 13 · where it stands (it does not)</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                The physics foundation
-                is now stable.
+                Where it actually
+                is right now.
             </h2>
 
             <p>
-                The current physics system can sustain 50 seconds of ground
-                contact with the 41-body creature without divergence.
+                50 seconds of continuous ground contact with all 41 bodies, no
+                divergence, no NaNs. That number sounds unimpressive until you've
+                watched a solver explode at second three for a fortnight.
             </p>
 
             <div class="status-grid">
@@ -807,9 +865,10 @@
             </div>
 
             <p class="architecture-note">
-                The complete combination of physics, topology, contacts,
-                reward and observations has not yet produced a demonstrated
-                standing policy. This is the next major validation step.
+                And the honest bit: every piece above works, and the combination
+                of them has still not produced a creature that stands. Physics,
+                topology, contacts, reward, observations — one or more of those
+                is wrong, and I don't yet know which. That's the next problem.
             </p>
 
         </div>
@@ -823,28 +882,29 @@
     <section class="case-section">
 
         <div class="case-section-title">
-            <span>14 / WHAT I LEARNED</span>
+            <span>// 14 · what this taught me</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                The hard part was not
-                just writing the solver.
+                The solver was
+                the easy part.
             </h2>
 
             <p>
-                Building the project taught me that technical animation sits
-                between several disciplines. The system needs to make sense
-                mathematically, behave physically, remain fast enough to
-                simulate, and still be controllable through useful tools.
+                Featherstone is written down in books. You can look it up. What
+                nobody writes down is that the same system has to be correct
+                mathematically, plausible physically, fast enough to train
+                against, <em>and</em> configurable by someone who has no
+                intention of reading your C++. Getting all four at once is the
+                actual job.
             </p>
 
             <p>
-                More importantly, I learned to treat debugging as an
-                experimental process: formulate a hypothesis, design a test
-                that can actually distinguish it, and only then change the
-                system.
+                The other thing I got out of this is a debugging habit I didn't
+                have before, described above. It came from losing enough days to
+                confident guesses that I stopped making them.
             </p>
 
         </div>
@@ -857,23 +917,23 @@
 
     <section class="case-next dark-section">
 
-        <p class="eyebrow">15 / WHAT'S NEXT</p>
+        <p class="eyebrow">// 15 · next</p>
 
         <h2>
-            From standing
-            to locomotion.
+            Stand up.
+            Then we'll talk.
         </h2>
 
         <p>
-            The immediate goal is to demonstrate a stable learned standing
-            behaviour. From there, the learning objective can progress toward
-            weight shifting, stepping and eventually locomotion.
+            One creature, standing, on purpose. That's the whole next milestone.
+            After that it gets to shift its weight, then take a step, and if it
+            ever walks I will be insufferable about it.
         </p>
 
         <p>
-            A second direction is runtime deployment, connecting the training
-            representation to Unreal's production-side systems through Chaos
-            and Control Rig.
+            Further out: getting this out of the training rig and into something
+            production-shaped, via Chaos and Control Rig. Learning in a sandbox
+            is fun. Learning something an animator can actually use is the point.
         </p>
 
         <a class="button" href="../../index.html#work">
@@ -888,15 +948,15 @@
 <footer id="contact">
 
     <div>
-        <p class="eyebrow">CONTACT</p>
+        <p class="eyebrow">// SAY HI</p>
         <h2>Corentin Watthez</h2>
     </div>
 
     <div class="footer-links">
-        <a href="#">GitHub ↗</a>
-        <a href="#">LinkedIn ↗</a>
-        <a href="#">ArtStation ↗</a>
-        <a href="mailto:your@email.com">Email ↗</a>
+        <a href="https://github.com/Orabs16">GitHub ↗</a>
+        <a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a>
+        <a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a>
+        <a href="mailto:corentinwatthez@gmail.com">Email ↗</a>
     </div>
 
     <p class="copyright">

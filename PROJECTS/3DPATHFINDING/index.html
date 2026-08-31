@@ -14,6 +14,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="../../CSS/style.css">
     <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
 </head>
 
 <body>
@@ -25,50 +26,44 @@
     <main>
         <section class="case-hero">
             <div class="case-hero-copy">
-                <p class="eyebrow">02 / 3D VOXEL PATHFINDING</p>
-                <h1>3D Voxel<br><span>Pathfinding Tool</span></h1>
-                <p class="case-intro">A custom navigation system for Unity designed to let agents navigate freely
-                    through 3D space — including walls, ceilings and fully volumetric environments.</p>
+                <p class="eyebrow">3D VOXEL PATHFINDING · UNITY 6</p>
+                <h1>NavMesh assumes<br><span>you have a floor.</span></h1>
+                <p class="case-intro">My creature wanted to walk on the ceiling. So I threw out the floor
+                    assumption entirely, voxelised the whole volume, and squeezed 64 walkability
+                    flags into a single 64-bit integer so the memory wouldn't be absurd.</p>
                 <div class="case-meta">
                     <div><span>ENGINE</span><strong>Unity 6</strong></div>
                     <div><span>LANGUAGE</span><strong>C#</strong></div>
                     <div><span>FOCUS</span><strong>Tooling · A* · Jobs · Burst</strong></div>
                 </div>
             </div>
-            <div class="media-label">PROJECT VIDEO / DEMO</div>
+            <div class="media-label">26 NEIGHBOURS · NO FLOOR REQUIRED</div>
             <div class="video-frame">
                 <video autoplay muted loop playsinline>
                     <source src="../../ASSET/VIDEO/Pathfinding demo.mp4" type="video/mp4">Your browser does not support
                     the video tag.
                 </video>
-                <div class="skeleton pose-hang">
-                    <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-                    <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-                    <i class="joint j7"></i><i class="joint j8"></i>
-                    <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-                    <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-                    <i class="bone b7"></i>
-                </div>
+                <svg class="stickman pose-hang"></svg>
             </div>
         </section>
 
         <section class="case-section">
-            <div class="case-section-title"><span>02 / THE QUESTION</span></div>
+            <div class="case-section-title"><span>// 01 · the problem with floors</span></div>
             <div class="case-section-content">
-                <h2>How can an agent navigate in true 3D?</h2>
-                <p>Unity's standard navigation workflow is built around NavMesh surfaces and is primarily suited to
-                    characters moving across floors. That becomes restrictive when a creature needs to climb walls, walk
-                    on ceilings, fly, swim or otherwise move through a volumetric environment.</p>
-                <p>I wanted to build a reusable pathfinding system from scratch that treats the environment as a 3D
-                    volume instead of a mostly horizontal surface.</p>
-                <p>The goal was not only to make it work, but to make the system practical for real-time use:
-                    asynchronous pathfinding, Burst-compiled jobs and a compact representation of the navigable space.
-                </p>
+                <h2>Down is not a universal constant.</h2>
+                <p>NavMesh is great, right up until your character stops agreeing that the ground is beneath it.
+                    It bakes surfaces you can stand on, which quietly bakes in the idea that there's a single "up".
+                    Spiders, climbers, fliers and swimmers all break that assumption immediately.</p>
+                <p>I could have hacked around it — multiple NavMeshes at different orientations, stitched
+                    together. People do. But it's a workaround for a model that just doesn't fit, so I wanted to
+                    build the thing that treats the world as a volume from the start.</p>
+                <p>The catch: a volume has vastly more places to be than a surface does. Making that practical at
+                    runtime, rather than merely correct, is where most of the actual work went.</p>
             </div>
         </section>
 
         <section class="case-section dark-section">
-            <div class="case-section-title"><span>03 / SYSTEM OVERVIEW</span></div>
+            <div class="case-section-title"><span>// 02 · how it fits together</span></div>
             <div class="case-section-content">
                 <h2>From geometry to a usable path.</h2>
                 <div class="architecture">
@@ -93,28 +88,25 @@
         </section>
 
         <section class="case-section">
-            <div class="case-section-title"><span>04 / VOXEL BAKING</span></div>
+            <div class="case-section-title"><span>// 03 · chopping the world into cubes</span></div>
             <div class="case-section-content">
                 <h2>A 3D grid instead of a navigation mesh.</h2>
-                <p>The first step is deciding which parts of the volume an agent can actually occupy. The tool samples
-                    the bake volume as a 3D voxel grid and uses Unity Physics queries to test each voxel against the
-                    environment.</p>
-                <p>A voxel is considered navigable when there is enough free space for the agent and it satisfies the
-                    configured distance-from-wall constraint. This makes the system useful for creatures that need to
-                    remain attached to nearby surfaces rather than simply moving through empty space.</p>
+                <p>The bake walks the volume as a 3D grid and asks Unity Physics, for every single voxel,
+                    "could the agent be here?" It is exactly as brute-force as it sounds, which is why it
+                    happens once at bake time and never again at runtime.</p>
+                <p>A voxel passes if there's room for the agent <em>and</em> it satisfies a maximum
+                    distance-from-wall. That second condition is the one that makes this useful rather than
+                    generic: a ceiling-crawler needs to stay stuck to surfaces, so the empty middle of a room
+                    should be unwalkable <em>for it</em> even though there's plenty of space there.</p>
+                <p>I built this for things that climb, not for things that fly. But the constraint is just a
+                    number, and turning it off should leave you with a grid full of open air — so a flier
+                    would probably fall out of it for free. I haven't tried. Now I want to.</p>
                 <div class="video-frame">
                     <video autoplay muted loop playsinline>
                         <source src="../../ASSET/VIDEO/Pathfinding show bake.mp4" type="video/mp4">Your browser does
                         not support the video tag.
                     </video>
-                    <div class="skeleton pose-sit">
-                        <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-                        <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-                        <i class="joint j7"></i><i class="joint j8"></i>
-                        <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-                        <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-                        <i class="bone b7"></i>
-                    </div>
+                    <svg class="stickman pose-sit"></svg>
                 </div>
                 <div class="two-column-text">
                     <div><span class="mini-label">VOXEL SIZE</span>
@@ -130,13 +122,16 @@
         </section>
 
         <section class="case-section dark-section">
-            <div class="case-section-title"><span>05 / DATA STRUCTURE</span></div>
+            <div class="case-section-title"><span>// 04 · the bit-packing trick</span></div>
             <div class="case-section-content">
                 <h2>64 voxels inside one number.</h2>
-                <p>A full 3D grid can become expensive very quickly. Instead of storing one boolean per voxel, the
-                    system packs walkability into 64-bit values.</p>
-                <p>Each grid cell represents a 4 × 4 × 4 block of fine voxels. The 64 walkable states are stored inside
-                    a single <code>ulong</code>, turning the grid into a compact bitfield representation.</p>
+                <p>This is my favourite part of the whole tool. A 3D grid grows cubically, and the naive
+                    version stores one <code>bool</code> per voxel — which in C# means a whole byte to hold
+                    one bit of information. Eight times more memory than the data actually needs, for a
+                    structure that's already the thing most likely to blow your budget.</p>
+                <p>So: each coarse cell covers a 4 × 4 × 4 block of fine voxels. That's 64 yes/no answers.
+                    A <code>ulong</code> is 64 bits. They fit exactly, which is one of those coincidences that
+                    feels like the universe giving you permission.</p>
                 <div class="architecture">
                     <div class="architecture-node"><span>4 × 4 × 4</span><strong>64 sub-voxels</strong><small>One coarse
                             grid cell</small></div>
@@ -147,21 +142,22 @@
                     <div class="architecture-node"><span>COMPACT</span><strong>Dense storage</strong><small>Less memory
                             per voxel state</small></div>
                 </div>
-                <p class="architecture-note">The trade-off is deliberate: the representation is slightly more complex to
-                    access, but it makes large volumetric grids much more practical than a naive boolean-per-voxel
-                    approach.</p>
+                <p class="architecture-note">The cost is that reading a voxel is now a shift and a mask instead of an
+                    array index. Worth it, and the whole coarse cell lands in cache in one go, which the search
+                    is quietly grateful for.</p>
             </div>
         </section>
 
         <section class="case-section">
-            <div class="case-section-title"><span>06 / A* PATHFINDING</span></div>
+            <div class="case-section-title"><span>// 05 · the search itself</span></div>
             <div class="case-section-content">
                 <h2>A* running directly in 3D.</h2>
-                <p>The actual path search is implemented from scratch as a Burst-compiled Unity Job. Instead of relying
-                    on a managed collection or repeatedly sorting a list, the open set uses a custom binary min-heap.
-                </p>
-                <p>The search supports all 26 neighbouring directions around a voxel, allowing movement along diagonals
-                    as well as through the three spatial axes.</p>
+                <p>A* itself is the least interesting thing here — it's the same algorithm everyone knows.
+                    What makes it fast or slow is the open set. Sorting a list every iteration is the classic
+                    beginner move, so it's a hand-rolled binary min-heap instead, inside a Burst-compiled Job
+                    where managed collections aren't invited anyway.</p>
+                <p>Every voxel has 26 neighbours in 3D, not 4 or 6. All of them are searched, so an agent can
+                    cut a proper diagonal through a room instead of doing that unmistakable staircase shuffle.</p>
                 <div class="feature-grid">
                     <div><span>01</span>
                         <h3>Binary min-heap</h3>
@@ -180,13 +176,15 @@
         </section>
 
         <section class="case-section dark-section">
-            <div class="case-section-title"><span>07 / PERFORMANCE</span></div>
+            <div class="case-section-title"><span>// 06 · keeping it off the main thread</span></div>
             <div class="case-section-content">
-                <h2>Keeping the search away from the main thread.</h2>
-                <p>Pathfinding can become expensive when multiple agents request paths at the same time. To avoid
-                    blocking gameplay, path requests are scheduled asynchronously through Unity's Job System.</p>
-                <p>The hot path is Burst-compiled and works with native Unity collections. Once the job completes, the
-                    result is returned to the agent through the asynchronous callback workflow.</p>
+                <h2>A hitch is worse than a slow path.</h2>
+                <p>One agent asking for a path is fine. Twenty agents asking on the same frame is a visible
+                    stutter, and players forgive a slightly late path far sooner than they forgive a frame
+                    spike. So requests go through the Job System and the agent gets called back whenever the
+                    answer is ready.</p>
+                <p>That means native collections throughout — Burst won't touch managed memory — which is
+                    the constraint that made bit-packing the grid convenient rather than merely clever.</p>
                 <div class="feature-grid">
                     <div><span>JOBS</span>
                         <h3>Asynchronous search</h3>
@@ -205,26 +203,21 @@
         </section>
 
         <section class="case-section">
-            <div class="case-section-title"><span>08 / EDITOR TOOLING</span></div>
+            <div class="case-section-title"><span>// 07 · making it usable by humans</span></div>
             <div class="case-section-content">
-                <h2>Making a technical system usable.</h2>
-                <p>A pathfinding algorithm is only useful to artists and designers if configuring it is straightforward.
-                    I therefore built custom Unity editor tooling around the system instead of exposing everything as
-                    raw component properties.</p>
-                <p>The bake volume can be resized directly in the Scene view using custom handles, while a dedicated
-                    PathFinding editor window exposes voxel size, wall distance and the bake command.</p>
+                <h2>Nobody should have to type coordinates.</h2>
+                <p>A clever algorithm behind a wall of raw inspector fields is a clever algorithm nobody uses.
+                    The default Unity component view would have made you type the bake volume's bounds in as
+                    numbers, which is exactly the kind of thing that makes a designer quietly go back to NavMesh.</p>
+                <p>So the volume gets Scene-view handles you drag, snapped to voxel multiples so you can't
+                    accidentally author a half-voxel. Voxel size, wall distance and the bake button live in one
+                    dedicated window, and gizmos draw the walkable voxels so you can see what you baked.</p>
                 <div class="video-frame">
                     <video autoplay muted loop playsinline>
                         <source src="../../ASSET/VIDEO/Pathfinding resize bake.mp4" type="video/mp4">Your browser does
                         not support the video tag.
                     </video>
-                    <div class="skeleton pose-push">
-                        <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-                        <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-                        <i class="joint j7"></i>
-                        <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-                        <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-                    </div>
+                    <svg class="stickman pose-push"></svg>
                 </div>
                 <div class="feature-grid">
                     <div><span>01</span>
@@ -244,7 +237,7 @@
         </section>
 
         <section class="case-section dark-section">
-            <div class="case-section-title"><span>09 / AGENT WORKFLOW</span></div>
+            <div class="case-section-title"><span>// 08 · what an agent actually does</span></div>
             <div class="case-section-content">
                 <h2>From a target to a moving agent.</h2>
                 <div class="learning-flow">
@@ -262,18 +255,20 @@
         </section>
 
         <section class="case-section">
-            <div class="case-section-title"><span>10 / DATA PERSISTENCE</span></div>
+            <div class="case-section-title"><span>// 09 · bake once, not every reload</span></div>
             <div class="case-section-content">
-                <h2>Bake once. Reuse the result.</h2>
-                <p>Baking a 3D navigation volume can be expensive, so the generated grid is stored in a ScriptableObject
-                    asset rather than being rebuilt every time the project reloads.</p>
-                <p>The packed voxel data is persisted alongside the voxel size so the baked navigation volume can be
-                    restored without repeating the full physics sampling process.</p>
+                <h2>Bake once. Not every reload.</h2>
+                <p>Sampling a whole volume against physics is slow, and Unity reloads domains constantly. Doing
+                    that work again on every script recompile would have been an excellent way to make myself
+                    hate this tool, so the grid goes into a ScriptableObject asset.</p>
+                <p>The voxel size is saved next to the packed data, because packed bits are meaningless without
+                    knowing what scale they were packed at — and a silently mismatched voxel size produces
+                    paths that are wrong in ways that look almost right.</p>
             </div>
         </section>
 
         <section class="case-section dark-section">
-            <div class="case-section-title"><span>11 / CURRENT STATE</span></div>
+            <div class="case-section-title"><span>// 10 · what works today</span></div>
             <div class="case-section-content">
                 <h2>A reusable 3D navigation prototype.</h2>
                 <div class="status-grid">
@@ -297,7 +292,7 @@
         <section class="case-section">
 
             <div class="case-section-title">
-                <span>12 / FUTURE DEVELOPMENT</span>
+                <span>// 11 · where I want to take it</span>
             </div>
 
             <div class="case-section-content">
@@ -399,30 +394,31 @@
         </section>
 
         <section class="case-section dark-section">
-            <div class="case-section-title"><span>13 / WHAT I LEARNED</span></div>
+            <div class="case-section-title"><span>// 12 · what this taught me</span></div>
             <div class="case-section-content">
-                <h2>Designing the data matters as much as the algorithm.</h2>
-                <p>The biggest challenge was not implementing A* itself. It was designing a representation of the world
-                    that could make a volumetric search practical.</p>
-                <p>The project pushed me to think about the whole pipeline: how physical geometry becomes data, how that
-                    data is stored, how the algorithm accesses it, and how the result can be exposed through tooling
-                    without making the system painful to use.</p>
+                <h2>A* took an afternoon. The rest took the project.</h2>
+                <p>I went in thinking the search was the hard bit. It isn't — it's in every textbook. The hard
+                    bit is deciding what the world even <em>is</em> as far as the search is concerned, because
+                    that decision sets your memory ceiling, your cache behaviour and your bake time before
+                    you've written a line of A*.</p>
+                <p>Which is the lesson I keep relearning: pick the data structure first, and the algorithm
+                    mostly writes itself. Pick the algorithm first and you'll be fighting your own layout for
+                    weeks.</p>
             </div>
         </section>
 
         <section class="case-next">
 
-            <p class="eyebrow">14 / LONG-TERM GOAL</p>
+            <p class="eyebrow">// 13 · the long game</p>
 
             <h2>
-                A navigation toolkit
-                built for complex 3D worlds.
+                Next: make it handle
+                a world that moves.
             </h2>
 
             <p>
-                The long-term direction is to evolve the prototype from a static
-                voxel pathfinder into a modular navigation framework capable of
-                handling large, changing and fully three-dimensional environments.
+                Right now it's a static bake. Fine for a prototype, useless the
+                moment someone closes a door. That's the next thing.
             </p>
 
             <a class="button" href="../../index.html#work">
@@ -433,12 +429,12 @@
     </main>
     <footer id="contact">
         <div>
-            <p class="eyebrow">CONTACT</p>
+            <p class="eyebrow">// SAY HI</p>
             <h2>Corentin Watthez</h2>
         </div>
-        <div class="footer-links"><a href="#">GitHub ↗</a><a href="#">LinkedIn ↗</a><a href="#">ArtStation ↗</a><a
-                href="mailto:your@email.com">Email ↗</a></div>
-        <p class="copyright">© 2026 CORentin Watthez</p>
+        <div class="footer-links"><a href="https://github.com/Orabs16">GitHub ↗</a><a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a><a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a><a
+                href="mailto:corentinwatthez@gmail.com">Email ↗</a></div>
+        <p class="copyright">© 2026 Corentin Watthez</p>
     </footer>
 </body>
 

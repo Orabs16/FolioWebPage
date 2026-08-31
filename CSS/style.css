@@ -169,104 +169,25 @@ footer {
   transform-origin: bottom;
 }
 
-.skeleton {
+/*
+ * The stickman rig itself (joints, bones, IK, pose data) lives entirely in
+ * JS/stickman.js — an <svg class="stickman pose-X"> is built and animated
+ * from there. The .video-frame anchor rules below (search "pose-hang") are
+ * all that's left in CSS: where each pose's fixed grip/foot point lands on
+ * its video's edge.
+ */
+.stickman {
   position: absolute;
-  pointer-events: none;
-  z-index: 1;
+  display: block;
+  overflow: visible; /* svg defaults to clipping at its viewBox; limbs that swing outside it (a raised head, a kicking foot) need to stay visible */
+  /* mobile browsers flash a translucent highlight box and/or a long-press
+     copy/save callout on anything tappable - purely cosmetic, doesn't touch
+     click/pointer events, so it's safe to turn off for a decorative figure */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
-
-.joint {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 18px rgba(85,214,255,.45);
-}
-
-.bone {
-  position: absolute;
-  height: 2px;
-  background: var(--accent);
-  transform-origin: left center;
-  opacity: .8;
-}
-
-/* pose: dead-hang from a bottom edge, traced from a GeoGebra sketch
-   (points A-H, y flipped from GeoGebra's up-positive axis to CSS's down-positive axis;
-   F was given as (1.2, 7.7) but every other point is negative and its segments
-   (k: D-F, l: F-H) mirror E's (i: D-E, j: E-G) exactly, so this uses (1.2, -7.7) to match) */
-.pose-hang {
-  width: 138px;
-  height: 208px;
-  transform-origin: top center;
-}
-
-.pose-hang .j1 { left: 0;      top: -6px;  } /* A: near hand */
-.pose-hang .j2 { left: 124.8px; top: -6px; } /* B: far hand */
-.pose-hang .j3 { left: 62.4px; top: 46.6px; } /* C: neck */
-.pose-hang .j4 { left: 62.4px; top: 114px;  } /* D: hip */
-.pose-hang .j5 { left: 38.4px; top: 148px;  } /* E: near knee */
-.pose-hang .j6 { left: 86.4px; top: 148px;  } /* F: far knee */
-.pose-hang .j7 { left: 22.4px; top: 194px;  } /* G: near foot */
-.pose-hang .j8 { left: 102.4px; top: 194px; } /* H: far foot */
-
-.pose-hang .b1 { width: 81.61px; left: 68.4px; top: 52.6px; transform: rotate(-139.89deg); } /* f: C-A, near arm */
-.pose-hang .b2 { width: 81.61px; left: 68.4px; top: 52.6px; transform: rotate(-40.11deg); }  /* g: C-B, far arm */
-.pose-hang .b3 { width: 67.4px;  left: 68.4px; top: 52.6px; transform: rotate(90deg); }      /* h: C-D, spine */
-.pose-hang .b4 { width: 41.62px; left: 68.4px; top: 120px;  transform: rotate(125.22deg); }  /* i: D-E, near thigh */
-.pose-hang .b5 { width: 48.70px; left: 44.4px; top: 154px;  transform: rotate(109.15deg); }  /* j: E-G, near shin */
-.pose-hang .b6 { width: 41.62px; left: 68.4px; top: 120px;  transform: rotate(54.78deg); }   /* k: D-F, far thigh */
-.pose-hang .b7 { width: 48.70px; left: 92.4px; top: 154px;  transform: rotate(70.85deg); }   /* l: F-H, far shin */
-
-/* pose: leaning into a right-hand edge, traced from a GeoGebra sketch
-   (points A-G, y flipped from GeoGebra's up-positive axis to CSS's down-positive axis) */
-.pose-push {
-  width: 178px;
-  height: 122px;
-  transform-origin: left center;
-}
-
-.pose-push .j1 { left: 82.6px; top: 47.6px; } /* A: hip */
-.pose-push .j2 { left: 48.8px; top: 75px;   } /* B: knee */
-.pose-push .j3 { left: 87px;   top: 105px;  } /* C: near foot */
-.pose-push .j4 { left: 159.2px; top: 105px; } /* D: far braced foot */
-.pose-push .j5 { left: -6px;   top: 18.6px; } /* E: lower hand, on the wall */
-.pose-push .j6 { left: -6px;   top: -4px;   } /* F: upper hand, on the wall */
-.pose-push .j7 { left: 44.8px; top: 2.4px;  } /* G: shoulder */
-
-.pose-push .b1 { width: 95.72px; left: 88.6px; top: 53.6px; transform: rotate(36.86deg); }   /* f: A-D, far leg */
-.pose-push .b2 { width: 43.51px; left: 88.6px; top: 53.6px; transform: rotate(140.95deg); }  /* g: A-B, thigh */
-.pose-push .b3 { width: 48.57px; left: 54.8px; top: 81px;   transform: rotate(38.16deg); }   /* h: B-C, shin */
-.pose-push .b4 { width: 58.92px; left: 88.6px; top: 53.6px; transform: rotate(-129.93deg); } /* I: A-G, spine */
-.pose-push .b5 { width: 53.32px; left: 50.8px; top: 8.4px;  transform: rotate(162.28deg); }  /* J: G-E, lower arm */
-.pose-push .b6 { width: 51.2px;  left: 50.8px; top: 8.4px;  transform: rotate(-172.81deg); } /* k: G-F, upper arm */
-
-/* pose: perched on a top edge, traced from a GeoGebra sketch
-   (points A-H, y flipped from GeoGebra's up-positive axis to CSS's down-positive axis;
-   point I was left disconnected in the sketch and is omitted here) */
-.pose-sit {
-  width: 216px;
-  height: 80px;
-  transform-origin: top center;
-}
-
-.pose-sit .j1 { left: 24.4px;  top: 14px;   } /* A: near knee */
-.pose-sit .j2 { left: 84.4px;  top: -6px;   } /* B: hip */
-.pose-sit .j3 { left: 69.2px;  top: 20.6px; } /* C: far knee */
-.pose-sit .j4 { left: 0;       top: 61.8px; } /* D: near foot */
-.pose-sit .j5 { left: 60.4px;  top: 67.8px; } /* E: far foot */
-.pose-sit .j6 { left: 182.4px; top: -57.8px;} /* F: shoulder */
-.pose-sit .j7 { left: 144.4px; top: -6px;   } /* G: near hand */
-.pose-sit .j8 { left: 204.4px; top: -6px;   } /* H: far hand */
-
-.pose-sit .b1 { width: 53.67px;  left: 6px;     top: 67.8px;  transform: rotate(-62.99deg); }  /* f: D-A, near shin */
-.pose-sit .b2 { width: 63.25px;  left: 30.4px;  top: 20px;    transform: rotate(-18.43deg); }  /* g: A-B, near thigh */
-.pose-sit .b3 { width: 30.64px;  left: 75.2px;  top: 26.6px;  transform: rotate(-60.29deg); }  /* h: C-B, far thigh */
-.pose-sit .b4 { width: 48.01px;  left: 66.4px;  top: 73.8px;  transform: rotate(-79.4deg); }   /* I: E-C, far shin */
-.pose-sit .b5 { width: 110.85px; left: 90.4px;  top: 0;       transform: rotate(-27.85deg); }  /* j: B-F, spine */
-.pose-sit .b6 { width: 59.51px;  left: 188.4px; top: -51.8px; transform: rotate(129.72deg); }  /* k: F-G, near arm */
-.pose-sit .b7 { width: 50.81px;  left: 188.4px; top: -51.8px; transform: rotate(64.35deg); }   /* l: F-H, far arm */
 
 .hero-label {
   position: absolute;
@@ -283,18 +204,14 @@ footer {
   padding: 150px 0;
 }
 
+/* this used to be a two-column grid: a narrow gutter for a .section-number,
+   then the heading. No HTML file ever had a .section-number, so the heading
+   was the only child and landed in the 80px gutter track - which crushed it
+   into a tall thin column against the left edge. The eyebrow does the
+   numbering job now, so the gutter (and its dead .section-number rule) is
+   gone and the heading gets the full width. */
 .section-heading {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 24px;
   margin-bottom: 70px;
-}
-
-.section-number {
-  padding-top: 5px;
-  color: var(--accent);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: .75rem;
 }
 
 .section h2 {
@@ -305,11 +222,43 @@ footer {
   letter-spacing: -.055em;
 }
 
-.featured-project {
+/* One project per row, video left, words right.
+   Three looping videos sharing a screen made the section unreadable - the eye
+   gets dragged between three unrelated subjects at once. Full-width rows with
+   a lot of air between them give each project a screen of its own, and
+   JS/video-focus.js makes sure only the one you're actually looking at plays. */
+.project-row {
   display: grid;
-  grid-template-columns: 1.55fr .7fr;
-  gap: 60px;
-  align-items: end;
+  grid-template-columns: 1.15fr .85fr;
+  /* the braced stickman leans off the right edge of the video, so the gap has
+     to clear the figure as well as the two columns */
+  gap: 110px;
+  /* tops line up. end-alignment bottom-aligned a 366px video against a much
+     taller text block, which dropped the video far below its own heading and
+     read as a bug rather than a choice */
+  align-items: start;
+  padding: 130px 0;
+  border-top: 1px solid var(--line);
+}
+
+.project-row:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+
+/* .video-frame is the positioning anchor for the stickmen, but it stretches to
+   the full grid column while .project-media caps out at 650px - so pose-push's
+   left:100% was landing well past the video's right edge, floating in the gap.
+   Pinning the frame to the same max-width puts the figure back on the border. */
+.project-row .video-frame {
+  width: min(100%, 650px);
+}
+
+/* the row's text column is narrower than the old featured layout, so the
+   headline has to come down with it or it wraps to four lines */
+.project-row .project-info h3 {
+  font-size: clamp(1.9rem, 2.4vw, 2.6rem);
+  margin: 16px 0 22px;
 }
 
 .project-media {
@@ -378,8 +327,7 @@ footer {
   border-radius: 50%;
 }
 
-.project-info h3,
-.project-card h3 {
+.project-info h3 {
   font-family: "Space Grotesk", sans-serif;
   letter-spacing: -.04em;
   line-height: .98;
@@ -390,8 +338,7 @@ footer {
   margin: 18px 0 26px;
 }
 
-.project-info > p:not(.project-index),
-.project-card > p:not(.project-index) {
+.project-info > p:not(.project-index) {
   color: var(--muted);
   max-width: 560px;
 }
@@ -421,45 +368,16 @@ footer {
   text-transform: uppercase;
 }
 
-.project-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  margin-top: 120px;
-}
-
-.card-media {
-  min-height: 390px;
-  margin-bottom: 28px;
-  display: flex;
-  align-items: flex-end;
-  padding: 18px;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: .7rem;
-  color: var(--muted);
-}
-
-.project-card h3 {
-  font-size: 2.2rem;
-  margin: 12px 0;
-}
-
-
-.project-card video {
-  width: 100%;
-  max-width: 650px;
-  aspect-ratio: 16 / 9;
-  display: block;
-  margin-bottom: 28px;
-  object-fit: cover;
-}
+/* .project-grid / .project-card / .card-media lived here for the old two-up
+   card row. Every project is a .project-row now, so they're gone. */
 
 .video-frame {
   position: relative;
 }
 
-/* the dangling legs need real clearance below; hands/hips/heads for the other
-   two poses stay inside the video's own footprint, so no baseline margin is needed */
+/* the dangling legs need real clearance below; hands/hips/heads for the
+   other poses stay inside the video's own footprint, so no baseline margin
+   is needed */
 .video-frame:has(.pose-hang) {
   margin-bottom: 100px;
 }
@@ -467,19 +385,28 @@ footer {
 .video-frame .pose-hang {
   top: 100%;
   left: 50%;
-  transform: translateX(-50%) scale(.43);
+  transform: translateX(-50%);
 }
 
 .video-frame .pose-push {
   left: 100%;
   top: 50%;
-  transform: translateY(-50%) scale(.27);
+  transform: translateY(-50%);
+}
+
+/* push's mobile stand-in anchors the same right edge as pose-push - it's
+   just built narrow (see JS/stickman.js) so it fits the smaller margin a
+   full-width mobile video leaves past that edge. */
+.video-frame .pose-push-mobile {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .video-frame .pose-sit {
   top: 0;
   left: 50%;
-  transform: translateX(-50%) scale(.37);
+  transform: translateX(-50%);
 }
 .statement {
   border-top: 1px solid var(--line);
@@ -596,7 +523,7 @@ footer h2 {
   }
 
   .hero,
-  .featured-project,
+  .project-row,
   .about-grid,
   footer {
     grid-template-columns: 1fr;
@@ -611,16 +538,9 @@ footer h2 {
     min-height: 430px;
   }
 
-  .video-frame .pose-push {
-    left: auto;
-    right: 0;
-    transform-origin: right center;
-    transform: translateY(-50%) scale(.32);
-  }
-
-  .project-grid {
-    grid-template-columns: 1fr;
-    gap: 70px;
+  .project-row {
+    gap: 40px;
+    padding: 80px 0;
   }
 
   .section {
@@ -628,7 +548,6 @@ footer h2 {
   }
 
   .section-heading {
-    grid-template-columns: 45px 1fr;
     margin-bottom: 45px;
   }
 
@@ -645,5 +564,106 @@ footer h2 {
 
   .footer-links {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---- hero readout card ------------------------------------------------
+   the right-hand hero column used to be an empty grid cell; it now holds a
+   live-ish status block for whatever project is currently eating my evenings.
+   update the numbers when they change - stale stats are worse than no stats. */
+
+.hero-card {
+  align-self: center;
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.hero-card-title {
+  margin: 0 0 20px;
+  color: var(--accent);
+  font-size: .68rem;
+  letter-spacing: .1em;
+}
+
+.readout {
+  margin: 0;
+}
+
+.readout > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.readout dt {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.readout dd {
+  margin: 0;
+  text-align: right;
+}
+
+/* the one line that isn't done yet gets to look unfinished */
+.readout .pending dd {
+  color: var(--accent);
+}
+
+.readout .pending dd::after {
+  content: "_";
+  animation: caret 1.1s steps(1) infinite;
+}
+
+@keyframes caret {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .readout .pending dd::after { animation: none; }
+}
+
+/* inline code in body copy - ulong, NaN, that kind of thing */
+code {
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--accent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .85em;
+}
+
+.footer-note {
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.copyright {
+  max-width: 68ch;
+  line-height: 1.7;
+}
+
+/* the about column now runs to three groups, so let the last one close it off */
+.toolbox .skill-group:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 800px) {
+  /* long eyebrows would otherwise overflow: nowrap is only safe on desktop */
+  .eyebrow {
+    white-space: normal;
+  }
+
+  .hero-card {
+    align-self: start;
   }
 }

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Corentin Watthez — Technical Animator focused on procedural animation, tools, physics and Unreal Engine.">
+    content="Corentin Watthez — technical animator. I write physics solvers, rigging tools, and other things that make creatures move badly until they don't.">
   <title>Corentin Watthez — Technical Animator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,8 @@
     href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="CSS/style.css">
+  <script src="JS/stickman.js" defer></script>
+  <script src="JS/video-focus.js" defer></script>
 </head>
 
 <body>
@@ -29,27 +31,49 @@
   <main>
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">TECHNICAL ANIMATOR / PROCEDURAL ANIMATION</p>
-        <h1>I BUILD SYSTEMS<br>THAT MAKE<br><span>CHARACTERS MOVE.</span></h1>
+        <p class="eyebrow">TECHNICAL ANIMATOR · PROCEDURAL ANIMATION</p>
+        <h1>Welcome to <br><span>my strange<br>workshop</span></h1>
         <p class="hero-intro">
-          Animation × Programming × Physics
+          Experimenting with tool, math, tech animation,<br>
+          And also, the most important part, weird creature.
         </p>
-        <a class="button" href="#work">View my work <span>↓</span></a>
+        <a class="button" href="#work">Go look at the weird stuff <span>↓</span></a>
+      </div>
+
+      <div class="hero-card">
+        <p class="hero-card-title">// what you've wandered into</p>
+        <dl class="readout">
+          <div><dt>this place</dt>
+            <dd>a small workshop for creatures that don't move right yet</dd>
+          </div>
+          <div><dt>current patient</dt>
+            <dd>a muscle-simulated monster, mid-training</dd>
+          </div>
+          <div><dt>the method</dt>
+            <dd>real physics, not animation curves</dd>
+          </div>
+          <div><dt>the vibe</dt>
+            <dd>equal parts science and stubbornness</dd>
+          </div>
+          <div class="pending"><dt>standing</dt>
+            <dd>not yet</dd>
+          </div>
+        </dl>
       </div>
     </section>
 
-    <section id="work" class="section">
+    <section id="work" class="section" data-solo-video>
       <div class="section-heading">
         <div>
-          <p class="eyebrow">01 / SELECTED WORK</p>
-          <h2>Systems, tools<br>& experiments.</h2>
+          <p class="eyebrow">// THINGS I BUILT</p>
+          <h2>Solvers, tools, and one monster<br>that still refuses to stand up.</h2>
         </div>
       </div>
 
-      <article class="featured-project">
+      <article class="project-row">
         <div class="video-frame">
           <div class="project-media">
-            <div class="media-label">PROJECT VIDEO / DEMO</div>
+            <div class="media-label">IT FALLS OVER. THAT PART WORKS.</div>
 
             <video autoplay muted loop playsinline>
               <source src="ASSET/VIDEO/MUTO Falling.mp4" type="video/mp4">
@@ -58,111 +82,130 @@
 
             <div class="media-corner">UNREAL ENGINE 5.6</div>
           </div>
-          <div class="skeleton pose-push">
-            <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-            <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-            <i class="joint j7"></i>
-            <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-            <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-          </div>
+          <svg class="stickman pose-push"></svg>
         </div>
         <div class="project-info">
-          <p class="project-index">01 / FLAGSHIP PROJECT</p>
-          <h3>Muscle-Based<br>Procedural Animation</h3>
+          <p class="project-index">THE BIG ONE / STILL GOING</p>
+          <h3>A creature with<br>simulated muscles</h3>
           <p>
-            An experimental system exploring whether a character can learn
-            locomotion through physically simulated muscles.
+            I wanted to know whether a creature could learn to stand using muscles
+            instead of animation curves. So I wrote the physics solver. Then the
+            muscle authoring tools. Then made it run 2048 times at once, because
+            reinforcement learning is hungry.
+          </p>
+          <p>
+            It still can't stand. The falling over, however, is now way more
+            physically accurate.
           </p>
           <div class="tags">
             <span>Unreal Engine</span>
             <span>C++</span>
-            <span>Physics</span>
-            <span>Machine Learning</span>
-            <span>Tools</span>
+            <span>AVX2</span>
+            <span>Featherstone ABA</span>
+            <span>PPO</span>
           </div>
-          <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">View case study <span>↗</span></a>
+          <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">Read the whole rabbit hole <span>↗</span></a>
         </div>
       </article>
 
-      
-      <div class="project-grid">
-        <article class="project-card">
-          <div class="video-frame">
+
+      <article class="project-row">
+        <div class="video-frame">
+          <div class="project-media">
+            <div class="media-label">NO FLOOR REQUIRED</div>
+
             <video autoplay muted loop playsinline>
               <source src="ASSET/VIDEO/Pathfinding demo.mp4" type="video/mp4">
               Your browser does not support the video tag.
             </video>
-            <div class="skeleton pose-sit">
-              <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-              <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-              <i class="joint j7"></i><i class="joint j8"></i>
-              <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-              <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-              <i class="bone b7"></i>
-            </div>
-          </div>
-          <p class="project-index">TOOL DEVELOPMENT</p>
-          <h3>3D pathfinding tool</h3>
-          <p>Editor and in game tooling designed to allow walking creature on ceiling</p>
-          <div class="tags"><span>Unity</span><span>C#</span><span>Tools</span></div>
-          <a class="text-link" href="PROJECTS/3DPATHFINDING/index.html">View case study <span>↗</span></a>
-        </article>
 
-        <article class="project-card">
-          <div class="video-frame">
+            <div class="media-corner">UNITY 6</div>
+          </div>
+          <svg class="stickman pose-sit"></svg>
+        </div>
+        <div class="project-info">
+          <p class="project-index">UNITY TOOLING</p>
+          <h3>Pathfinding for things<br>that walk on ceilings</h3>
+          <p>
+            NavMesh assumes you have a floor. Ceiling-crawlers disagree. So I
+            voxelised the whole volume instead, then packed 64 walkability bits
+            into a single <code>ulong</code> so the grid wouldn't eat all the RAM.
+          </p>
+          <div class="tags"><span>Unity</span><span>C#</span><span>Burst</span><span>Bit-packing</span></div>
+          <a class="text-link" href="PROJECTS/3DPATHFINDING/index.html">How the bitfield works <span>↗</span></a>
+        </div>
+      </article>
+
+      <article class="project-row">
+        <div class="video-frame">
+          <div class="project-media">
+            <div class="media-label">EIGHT LEGS, NO KEYFRAMES</div>
+
             <video autoplay muted loop playsinline>
               <source src="ASSET/VIDEO/SpiderWalking.mp4" type="video/mp4">
               Your browser does not support the video tag.
             </video>
-            <div class="skeleton pose-hang">
-              <i class="joint j1"></i><i class="joint j2"></i><i class="joint j3"></i>
-              <i class="joint j4"></i><i class="joint j5"></i><i class="joint j6"></i>
-              <i class="joint j7"></i><i class="joint j8"></i>
-              <i class="bone b1"></i><i class="bone b2"></i><i class="bone b3"></i>
-              <i class="bone b4"></i><i class="bone b5"></i><i class="bone b6"></i>
-              <i class="bone b7"></i>
-            </div>
+
+            <div class="media-corner">MAYA + UNITY</div>
           </div>
-          <p class="project-index">PROCEDURAL ANIMATION</p>
-          <h3>Animation Systems</h3>
-          <p>First experiments in rigging, procedural behaviour and runtime character systems.</p>
-          <div class="tags"><span>Maya</span><span>Unity</span><span>Animation</span></div>
-          
-          <a class="text-link" href="https://www.artstation.com/artwork/eRRg83">View case study ↗</a>
-        </article>
-      </div>
+          <svg class="stickman pose-hang"></svg>
+        </div>
+        <div class="project-info">
+          <p class="project-index">WHERE THIS STARTED</p>
+          <h3>The spider that<br>started all this</h3>
+          <p>
+            My first go at rigging and procedural behaviour. Eight legs, and the
+            realisation that hand-keying a spider is a punishment, and that I would
+            rather make the computer do it.
+          </p>
+          <div class="tags"><span>Maya</span><span>Unity</span><span>Rigging</span></div>
+          <a class="text-link" href="https://www.artstation.com/artwork/eRRg83">On ArtStation <span>↗</span></a>
+        </div>
+      </article>
     </section>
 
 
     <section id="about" class="section about">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">02 / ABOUT</p>
-          <h2>Animation ×<br>Programming × Physics</h2>
+          <p class="eyebrow">// WHOAMI</p>
+          <h2>I'd rather spend a week on the tool<br>than a day on the animation.</h2>
         </div>
       </div>
 
       <div class="about-grid">
         <div>
           <p class="large-copy">
-            I'm Corentin, a technical animator focused on procedural animation,
-            character systems and tools.
+            I'm Corentin. Technical animator — which mostly means I'm the person
+            you ask "can the character do this?", and I disappear for a while and
+            come back with a tool.
           </p>
           <p>
-            I enjoy working at the intersection between animation and engineering:
-            building tools for artists, experimenting with physical simulation,
-            and turning complex technical systems into something usable.
+            I like the part of animation that turns into maths. Joint conventions,
+            solver stability, why the units are wrong, whether a NaN is sneaking
+            past the fall detection. I will happily read a robotics paper from the
+            eighties to make a monster shift its weight convincingly, and I think
+            that is a completely reasonable trade.
+          </p>
+          <p>
+            The other half of the job is making sure nobody else has to care about
+            any of that. A solver nobody can configure is just an expensive crash.
           </p>
         </div>
         <div class="toolbox">
-          <p class="eyebrow">TOOLBOX</p>
+          <p class="eyebrow">WHAT I ACTUALLY USE</p>
           <div class="skill-group">
-            <span>PRIMARY</span>
-            <strong>Unreal Engine · Unity · C# · Procedural Animation</strong>
+            <span>DAILY, WITHOUT THINKING</span>
+            <strong>Unreal Engine · Unity · C# · rigging &amp; procedural animation</strong>
           </div>
           <div class="skill-group">
-            <span>WORKING KNOWLEDGE</span>
-            <strong>C++ · Tooling · Physics · Maya · Machine Learning</strong>
+            <span>WHERE I GO WHEN IT GETS INTERESTING</span>
+            <strong>C++ · SIMD intrinsics · articulated-body dynamics · constraint
+              solvers · PPO</strong>
+          </div>
+          <div class="skill-group">
+            <span>CAN DRIVE IT, WON'T CLAIM TO BE AN ARTIST IN IT</span>
+            <strong>Maya</strong>
           </div>
         </div>
       </div>
@@ -170,8 +213,8 @@
 
     <section id="cv" class="section cv">
       <div>
-        <p class="eyebrow">03 / RESUME</p>
-        <h2>Let's build<br>something that moves.</h2>
+        <p class="eyebrow">// THE PDF VERSION</p>
+        <h2>Same person,<br>fewer jokes.</h2>
       </div>
       <a class="button" href="ASSET/WatthezCorentinResume.pdf" download>Download CV <span>↓</span></a>
     </section>
@@ -179,8 +222,11 @@
 
   <footer id="contact">
     <div>
-      <p class="eyebrow">CONTACT</p>
+      <p class="eyebrow">// SAY HI</p>
       <h2>Corentin Watthez</h2>
+      <p class="footer-note">
+        Always up for talking about tech animation, or any other weird passion.
+      </p>
     </div>
     <div class="footer-links">
       <a href="https://github.com/Orabs16">GitHub ↗</a>
@@ -188,7 +234,9 @@
       <a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a>
       <a href="mailto:corentinwatthez@gmail.com">Email ↗</a>
     </div>
-    <p class="copyright">© 2026 Corentin Watthez</p>
+    <p class="copyright">
+      © 2026 Corentin Watthez — PS : Try clicking on the stickman ;)
+    </p>
   </footer>
 </body>
 

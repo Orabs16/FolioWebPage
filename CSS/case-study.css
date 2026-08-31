@@ -637,3 +637,12 @@
     }
 
 }
+/* .case-next sets its own constrained width, and because it is declared after
+   .dark-section it was winning the cascade - so the closing section's grey
+   background stopped at the content column instead of running edge to edge.
+   Same full-bleed treatment as .dark-section, at a specificity that holds. */
+.case-next.dark-section {
+    width: 100%;
+    padding-left: max(24px, calc((100vw - var(--max)) / 2));
+    padding-right: max(24px, calc((100vw - var(--max)) / 2));
+}
