@@ -90,18 +90,20 @@
           <p>
             I wanted to know whether a creature could learn to stand using muscles
             instead of animation curves. So I wrote the physics solver. Then the
-            muscle authoring tools. Then made it run 2048 times at once, because
-            reinforcement learning is hungry.
+            muscle authoring tools. Then the PPO trainer, after deleting the
+            off-the-shelf one for hiding its own numbers from me.
           </p>
           <p>
-            It still can't stand. The falling over, however, is now way more
-            physically accurate.
+            It doesn't stand yet — it survives. Turns out a reward cap was
+            quietly paying it to crouch, which is a much more interesting failure
+            than falling over.
           </p>
           <div class="tags">
             <span>Unreal Engine</span>
             <span>C++</span>
             <span>AVX2</span>
             <span>Featherstone ABA</span>
+            <span>PyTorch</span>
             <span>PPO</span>
           </div>
           <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">Read the whole rabbit hole <span>↗</span></a>
@@ -201,7 +203,7 @@
           <div class="skill-group">
             <span>WHERE I GO WHEN IT GETS INTERESTING</span>
             <strong>C++ · SIMD intrinsics · articulated-body dynamics · constraint
-              solvers · PPO</strong>
+              solvers · PyTorch · PPO</strong>
           </div>
           <div class="skill-group">
             <span>CAN DRIVE IT, WON'T CLAIM TO BE AN ARTIST IN IT</span>

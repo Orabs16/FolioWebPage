@@ -54,10 +54,11 @@
             </h1>
 
             <p class="case-intro">
-                It can't stand up yet. But after a long stretch where every
-                single run ended in a heap on the floor, I'm finally starting
-                to see real results come out of the training — and that part
-                is genuinely exciting.
+                It doesn't stand up yet — but it no longer falls over. After a
+                long stretch where every run ended in a heap on the floor, the
+                creature now stays off the ground for entire episodes. In a
+                crouch, for reasons that turned out to be my fault rather than
+                its own.
             </p>
 
             <div class="case-meta">
@@ -162,7 +163,7 @@
                 <div class="architecture-node">
                     <span>01</span>
                     <strong>Skeletal Mesh</strong>
-                    <small>52-bone creature</small>
+                    <small>52-bone rig</small>
                 </div>
 
                 <div class="architecture-arrow">→</div>
@@ -186,7 +187,7 @@
                 <div class="architecture-node">
                     <span>04</span>
                     <strong>RL Policy</strong>
-                    <small>PPO control</small>
+                    <small>Custom PyTorch PPO</small>
                 </div>
 
                 <div class="architecture-arrow">→</div>
@@ -315,6 +316,9 @@
                     <p>
                         The solver uses an O(n) articulated-body formulation
                         without explicitly constructing the full mass matrix.
+                        The 52-bone rig collapses to a 41-body tree: the
+                        skeleton's bone count and the solver's topology are
+                        two different things.
                     </p>
                 </div>
 
@@ -340,13 +344,13 @@
     <section class="case-section">
 
         <div class="case-section-title">
-            <span>// 06 · 2048 at once</span>
+            <span>// 06 · many at once</span>
         </div>
 
         <div class="case-section-content">
 
             <h2>
-                Thousands of environments.
+                Many environments.
                 One solver.
             </h2>
 
@@ -373,6 +377,15 @@
                 the two disagree, the fast one is wrong.
             </p>
 
+            <p>
+                The batch size that actually trains, though, is 64 — not the
+                biggest number the solver can survive. I measured it: going to
+                256 buys about 21% more samples per second, which is less than
+                the run-to-run thermal variance on this laptop, and it costs
+                four times the iteration latency. Bigger looked better on a
+                slide and worse on a stopwatch.
+            </p>
+
             <div class="feature-grid">
 
                 <div>
@@ -385,11 +398,11 @@
                 </div>
 
                 <div>
-                    <span>2048</span>
+                    <span>64</span>
                     <h3>Environments</h3>
                     <p>
-                        The batched solver has been validated with up to
-                        2048 parallel environments.
+                        The batch size training actually uses — chosen by
+                        measurement, not by ambition.
                     </p>
                 </div>
 
@@ -473,8 +486,23 @@
 
             <p class="architecture-note">
                 I expected the rewrite to cost me performance in exchange for
-                correctness. Profiler said 1.57× <em>cheaper</em> than the
-                per-row version. I'll take it.
+                correctness. The global solve came out 1.57× <em>cheaper</em>
+                than the per-row path — and that's while doing 64 solver sweeps
+                against the old path's 16, because a dense sweep costs no tree
+                traversals. It also cut peak penetration by a third and held the
+                torso half again as high. To be clear about the claim: that's
+                the constraint solve, not an end-to-end framerate number.
+            </p>
+
+            <p>
+                A postscript on tuning, because it's a lesson I keep relearning:
+                the contact solver had a relaxation-iteration count I'd tuned
+                carefully — under a step ordering that changed the very next
+                day. Nobody re-checked it. Months later I swept it and found the
+                right answer was now zero: resting penetration dropped from
+                7.5 cm to 0.54 cm, which is the contact slop, and contact-force
+                flicker fell by 96%. Every tuned constant has an expiry date
+                stamped on the assumptions it was tuned under.
             </p>
 
         </div>
@@ -499,10 +527,24 @@
             </h2>
 
             <p>
-                The learning layer uses Unreal Learning Agents with PPO.
-                The policy receives information about the creature's physical
-                state and produces a normalized action for every controllable
-                degree of freedom.
+                The learning layer started out as Unreal Learning Agents. I
+                deleted it. Running the learner inside the engine meant the
+                numbers that tell you whether PPO is actually healthy — loss,
+                KL, entropy — were somebody else's implementation detail, and
+                I couldn't see them. So I threw the whole thing out and wrote
+                my own PPO in PyTorch: clipped surrogate, GAE, KL early-stop,
+                advantage normalisation, value clipping. No RL framework
+                underneath it. If it's wrong now, it's wrong in a way I can
+                read.
+            </p>
+
+            <p>
+                It runs as a <em>separate process</em>. Python trains, a
+                headless Unreal commandlet simulates, and the two talk over
+                TCP on loopback with a small binary framed protocol. The
+                policy receives the creature's physical state — 852
+                observations — and produces a normalized action for each of
+                the 68 controllable degrees of freedom.
             </p>
 
             <div class="learning-flow">
@@ -511,7 +553,9 @@
                 <span>→</span>
                 <div>OBSERVATIONS</div>
                 <span>→</span>
-                <div>PPO POLICY</div>
+                <div>TCP</div>
+                <span>→</span>
+                <div>PYTORCH PPO</div>
                 <span>→</span>
                 <div>TORQUES</div>
                 <span>→</span>
@@ -529,9 +573,19 @@
 
             <p>
                 No locomotion in the objective. None. It is very tempting to
-                skip ahead to walking, and every time I'm tempted, the creature
-                plants its face into the ground and reminds me that I can't yet
-                prove it can even hold still.
+                skip ahead to walking, and the reason I don't is further down
+                the page: the thing that looks like success here turned out to
+                be the creature gaming a badly written reward.
+            </p>
+
+            <p>
+                Two policy architectures share the same trainer: a 256×256 MLP,
+                and a pure-PyTorch Mamba with recurrent PPO. The recurrent one
+                is meaningfully faster early — 25% fewer samples to reach the
+                first survival milestone, 20% to the next — and then the two
+                converge as the episode cap starts to bind. The MLP is the one
+                that plays back in-engine today; a C++ executor for recurrent
+                policies is on the list.
             </p>
 
         </div>
@@ -590,12 +644,22 @@
             </div>
 
             <p>
-                Training runs on a background thread, because the Python PPO
-                round-trip will happily freeze the whole Unreal editor otherwise.
-                Then the visualiser nearly reintroduced the exact same stall by
-                reaching into the live policy every frame — so it takes periodic
-                snapshots instead. Watching the creature shouldn't be allowed to
-                slow down the creature.
+                Training doesn't run in the editor at all any more — not on a
+                background thread, not in PIE. It's a headless commandlet and a
+                Python process, and the editor panel is just a remote control:
+                it launches the run, tails its log, draws the curves, and can
+                stop it. Close the editor and training carries on. The panel
+                even writes out a .bat that reproduces the identical run with
+                no editor involved.
+            </p>
+
+            <p>
+                Each run pins its own config to disk, and two hashes stop me
+                lying to myself: one covers the observation layout and the rig,
+                the other the full physics and reward setup. A checkpoint that
+                doesn't match refuses to resume. I added those after losing time
+                to a run that was quietly training against settings I'd since
+                changed.
             </p>
 
         </div>
@@ -645,11 +709,11 @@
             <div class="feature-grid">
 
                 <div>
-                    <span>20+</span>
+                    <span>14</span>
                     <h3>Automation tests</h3>
                     <p>
-                        Permanent tests cover important solver and system
-                        behaviours.
+                        Permanent tests covering solver and system behaviour,
+                        alongside a rotating set of temporary diagnostics.
                     </p>
                 </div>
 
@@ -728,6 +792,17 @@
                 <strong>Stale state surviving a reset,</strong> and joint
                 conventions that were wrong in a way that still looked plausible
                 — those two rounded it out.
+            </p>
+
+            <p>
+                <strong>And one I haven't caught yet.</strong> At every single
+                spawn, the back-right limb swings up and snaps backwards into the
+                leg before the creature settles. Every policy, every run, going
+                back months. I've verified the authored data is symmetric —
+                masses, capsules, DOF ranges, muscle strengths, all six left/right
+                contact-sphere pairs. It is still only happening on one side. I
+                don't know why yet, and I'd rather say that than pretend the
+                list above is complete.
             </p>
 
             <p>
@@ -819,9 +894,35 @@
             </h2>
 
             <p>
-                50 seconds of continuous ground contact with all 41 bodies, no
-                divergence, no NaNs. That number sounds unimpressive until you've
-                watched a solver explode at second three for a fortnight.
+                The solver holds 50 seconds of continuous ground contact with
+                all 41 bodies, under a passive drop and under random torque
+                babble, with no divergence and no NaNs. That sounds unimpressive
+                until you've watched a solver explode at second three for a
+                fortnight.
+            </p>
+
+            <p>
+                And the creature now survives the full 30-second episode in 99%
+                of attempts, against 101 steps for random torque babble and 610
+                for a CEM-optimised constant controller. Which sounds like
+                standing, and isn't.
+                It's crouching — about 300 units tall where standing is 414 —
+                and the reason is the most instructive bug in the project:
+                a blow-up guard was clamping total reward at 10 per step, and
+                with the height term scaled the way it was, <em>every living
+                step hit the cap</em>. Measured afterwards: 9.99 reward per step,
+                all run long. Height was mathematically invisible to the policy.
+                So it optimised the only thing it could still see — not falling
+                over — and did that superbly.
+            </p>
+
+            <p>
+                The reward is rewritten now: height ramps rather than
+                saturating, there's a term for getting limbs off the ground, and
+                the clamp scales with the configured maximum instead of sitting
+                below it. No run has finished under the corrected version yet.
+                So the headline stays what it honestly is — it survives, in a
+                crouch — until a training run says otherwise.
             </p>
 
             <div class="status-grid">
@@ -841,7 +942,7 @@
                 <div class="status complete">
                     <span>✓</span>
                     <strong>Batched simulation</strong>
-                    <small>Validated to 2048 environments</small>
+                    <small>64 environments per run</small>
                 </div>
 
                 <div class="status complete">
@@ -852,23 +953,24 @@
 
                 <div class="status complete">
                     <span>✓</span>
-                    <strong>RL integration</strong>
-                    <small>Integrated</small>
+                    <strong>Custom PyTorch PPO</strong>
+                    <small>MLP + Mamba, training end to end</small>
                 </div>
 
                 <div class="status">
                     <span>→</span>
-                    <strong>Learned standing</strong>
+                    <strong>Standing at height</strong>
                     <small>Next major milestone</small>
                 </div>
 
             </div>
 
             <p class="architecture-note">
-                And the honest bit: every piece above works, and the combination
-                of them has still not produced a creature that stands. Physics,
-                topology, contacts, reward, observations — one or more of those
-                is wrong, and I don't yet know which. That's the next problem.
+                And the honest bit: every piece above works, and what they add up
+                to is a creature that has learned to survive rather than to stand.
+                The difference between those two is one badly scaled reward term,
+                which is either reassuring or alarming depending on how you look
+                at it. Next run tells me which.
             </p>
 
         </div>
