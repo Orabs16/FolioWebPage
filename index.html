@@ -34,8 +34,8 @@
         <p class="eyebrow">TECHNICAL ANIMATOR · PROCEDURAL ANIMATION</p>
         <h1>Welcome to <br><span>my strange<br>workshop</span></h1>
         <p class="hero-intro">
-          Experimenting with tool, math, tech animation,<br>
-          And also, the most important part, weird creature.
+          Experimenting with tools, maths and tech animation,<br>
+          and, most importantly, weird creatures.
         </p>
         <a class="button" href="#work">Go look at the weird stuff <span>↓</span></a>
       </div>
@@ -56,7 +56,7 @@
             <dd>equal parts science and stubbornness</dd>
           </div>
           <div class="pending"><dt>standing</dt>
-            <dd>not yet</dd>
+            <dd>89% of the way (also, briefly, flying)</dd>
           </div>
         </dl>
       </div>
@@ -94,9 +94,9 @@
             off-the-shelf one for hiding its own numbers from me.
           </p>
           <p>
-            It doesn't stand yet — it survives. Turns out a reward cap was
-            quietly paying it to crouch, which is a much more interesting failure
-            than falling over.
+            It stands at about 89% of its full height now. Then I set the target
+            taller than it actually is, and it found a bug in my physics that let
+            it fly 330 metres straight up instead.
           </p>
           <div class="tags">
             <span>Unreal Engine</span>
@@ -106,7 +106,10 @@
             <span>PyTorch</span>
             <span>PPO</span>
           </div>
-          <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">Read the whole rabbit hole <span>↗</span></a>
+          <div class="project-links">
+            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">Read the whole rabbit hole <span>↗</span></a>
+            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/bugs.html">Or skip to the bugs <span>↗</span></a>
+          </div>
         </div>
       </article>
 
@@ -130,11 +133,10 @@
           <h3>Pathfinding for things<br>that walk on ceilings</h3>
           <p>
             NavMesh assumes you have a floor. Ceiling-crawlers disagree. So I
-            voxelised the whole volume instead, then packed 64 walkability bits
-            into a single <code>ulong</code> so the grid wouldn't eat all the RAM.
+            voxelised the whole volume instead, then optimised it so the grid wouldn't eat all the RAM.
           </p>
           <div class="tags"><span>Unity</span><span>C#</span><span>Burst</span><span>Bit-packing</span></div>
-          <a class="text-link" href="PROJECTS/3DPATHFINDING/index.html">How the bitfield works <span>↗</span></a>
+          <a class="text-link" href="PROJECTS/3DPATHFINDING/index.html">How it works <span>↗</span></a>
         </div>
       </article>
 

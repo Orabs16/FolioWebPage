@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="AgentSolver bug journal — every bug looks like the creature falling over. This is what was actually behind each one, including the joint-welding physics bug the policy learned to exploit to fly.">
+
+    <title>AgentSolver: Bug Journal — Corentin Watthez</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../../CSS/style.css">
+    <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
+    <script src="../../JS/video-focus.js" defer></script>
+</head>
+
+<body>
+
+    <header class="site-header">
+        <a class="logo" href="../../index.html">CW<span>.</span></a>
+
+        <nav>
+            <a href="../../index.html#work">Work</a>
+            <a href="../../index.html#about">About</a>
+            <a href="../../index.html#cv">CV</a>
+            <a href="../../index.html#contact">Contact</a>
+        </nav>
+    </header>
+
+
+    <main data-solo-video>
+
+        <!-- HERO -->
+
+        <section class="case-hero">
+
+            <div class="case-hero-copy">
+
+                <p class="eyebrow">
+                    AGENTSOLVER · BUG JOURNAL · PART 3 OF 3
+                </p>
+
+                <h1>
+                    Every bug looks<br>
+                    <span>exactly the same.</span>
+                </h1>
+
+                <p class="case-intro">
+                    The creature falls over. That's the whole error message. This is
+                    the list of what was actually behind it each time — plus the one
+                    bug that presented as the complete opposite.
+                </p>
+
+                <div class="case-meta">
+
+                    <div>
+                        <span>ENTRIES</span>
+                        <strong>6</strong>
+                    </div>
+
+                    <div>
+                        <span>STILL OPEN</span>
+                        <strong>0 (for now)</strong>
+                    </div>
+
+                    <div>
+                        <span>ERROR MESSAGE</span>
+                        <strong>It fell over</strong>
+                    </div>
+
+                    <div>
+                        <span>FAVOURITE</span>
+                        <strong>The one where it flew</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHAPTERS -->
+
+        <div class="chapters" role="navigation" aria-label="AgentSolver chapters">
+            <a class="chapter" href="index.html">
+                <span>01 · THE STORY</span>
+                <strong>Why, what, and where it's at</strong>
+                <small>Start here. Minimum maths, maximum monster.</small>
+            </a>
+            <a class="chapter" href="technical.html">
+                <span>02 · UNDER THE HOOD</span>
+                <strong>Solver, SIMD, PPO</strong>
+                <small>The actual numbers. Featherstone, AVX2, a global constraint solve and a hand-written
+                    trainer.</small>
+            </a>
+            <a class="chapter" href="bugs.html" aria-current="page">
+                <span>03 · BUG JOURNAL</span>
+                <strong>It fell over again</strong>
+                <small>Every bug looks identical. Except the one where it flew.</small>
+            </a>
+        </div>
+
+
+
+        <!-- INDEX -->
+
+        <section class="case-section">
+
+            <div class="case-section-title">
+                <span>// the index</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    A field guide to
+                    "it fell over again".
+                </h2>
+
+                <p>
+                    Each entry is the same shape: what it looked like, what it
+                    actually was, and what it taught me. And yes, every tag below
+                    says fixed. For now.
+                </p>
+
+                <div class="bug-index">
+                    <a href="#bug-flying"><span class="num">01</span><span class="title">It learned to fly</span><span
+                            class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-crouch"><span class="num">02</span><span class="title">It got paid to
+                            crouch</span><span class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-relax"><span class="num">03</span><span class="title">The constant with an expiry
+                            date</span><span class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-nan"><span class="num">04</span><span class="title">The NaN that got away</span><span
+                            class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-units"><span class="num">05</span><span class="title">Centimetres</span><span
+                            class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-reset"><span class="num">06</span><span class="title">Ghosts from the last
+                            episode</span><span class="bug-tag fixed">Fixed</span></a>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 01 FLYING -->
+
+        <section class="case-section dark-section" id="bug-flying">
+
+            <div class="case-section-title">
+                <span>// entry 01</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    It learned
+                    to fly.
+                </h2>
+
+                <p>
+                    Every other entry on this page is some flavour of "it fell over".
+                    This one is the exact opposite, which is exactly why it's my
+                    favourite.
+                </p>
+
+                <p>
+                    <strong>First, joint welding.</strong> When a leg is folded hard
+                    against its joint stop and a muscle is still pushing into it, the
+                    solver treats that joint as rigid for the substep. This simplified
+                    the solver a lot, and it helped keep things stable during the early
+                    stages of building it. Good idea.
+                </p>
+
+                <p>
+                    <strong>The bug.</strong> Welding only happens inside the
+                    constraint solver. The main dynamics pass never welds. So the
+                    solver works out impulses for a stiff creature and then applies
+                    them to the real, floppy one — and those don't add up to zero
+                    momentum. On the ground, the floor soaks up the difference and
+                    nobody notices. In mid-air, every force is internal, and the error
+                    becomes <em>thrust</em>. That's my best explanation, and the
+                    numbers below back it hard.
+                </p>
+
+                <p>
+                    <strong>The motive.</strong> I wanted the creature to stand as tall
+                    as it possibly could, so I pushed the height target higher than it
+                    could ever reach. Maybe I underestimated the learning process, haha.
+                </p>
+
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/FlyingMuto.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <span class="media-caption">
+                        I ASKED FOR STANDING
+                    </span>
+                </div>
+
+                <p>
+                    That morning, I saw that the policy was reproducing the default
+                    standing pose nicely, but it was struggling with the height it
+                    reached. So I thought: maybe I can just set every other reward to
+                    near zero and push height really high.
+                </p>
+
+                <p>
+                    <strong>Going back to my little run.</strong> First thing: a very
+                    good learning curve. It had successfully learned. I was very happy,
+                    so I launched the editor to see what it actually looked like... It
+                    was flying. More specifically, it would get on its feet, jump, then
+                    crawl through the air. I was stunned, and a little proud of it. Then
+                    came the debugging.
+                </p>
+
+                <p>
+                    <strong>First hypothesis.</strong> Being in the air massively
+                    narrowed down the possible sources of this infinite energy. After
+                    some value debugging, I found something that looked like the root
+                    cause: the welding.
+                </p>
+
+                <div class="bisect-wrap">
+                    <table class="bisect">
+                        <caption>Fitted vertical acceleration while airborne. Anything that isn't −200 is physics lying.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>Switched off</th>
+                                <th>cm/s²</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="is-baseline">
+                                <td>Nothing, as shipped</td>
+                                <td>+457</td>
+                            </tr>
+                            <tr>
+                                <td>Joint-limit rows (back to the old clamp)</td>
+                                <td>+537</td>
+                            </tr>
+                            <tr>
+                                <td>Old per-row solver instead</td>
+                                <td>+359</td>
+                            </tr>
+                            <tr>
+                                <td>Limb self-collision</td>
+                                <td>+292</td>
+                            </tr>
+                            <tr class="is-culprit">
+                                <td>Joint welding</td>
+                                <td>−15</td>
+                            </tr>
+                            <tr class="is-culprit">
+                                <td>Welding, limit rows and limb collision together</td>
+                                <td>−228</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>
+                    Welding off takes it from climbing to barely hovering.
+                    <strong>Welding was supposed to be a solution</strong>, and it had
+                    become the problem.
+                </p>
+
+                <p>
+                    <strong>Status: fixed.</strong> Welding is gone from the solver.
+                    And because a bug like this never shows up as a crash, I also wrote
+                    a test for exactly this situation: the real rig, a kilometre up,
+                    full-strength random torques, and its momentum is only allowed to
+                    change by gravity.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>A monster jumping. Then crawling through the air.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>Joint welding applied in the constraint solve but not in the dynamics, leaking momentum —
+                            plus a height target above its real standing height.</dd>
+                    </div>
+                    <div>
+                        <dt>Fix</dt>
+                        <dd>Welding removed from the solver.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>A policy is the most thorough fuzzer you will ever own. If the physics has a hole, training
+                            is how you find out.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 02 CROUCH -->
+
+        <section class="case-section" id="bug-crouch">
+
+            <div class="case-section-title">
+                <span>// entry 02</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    It got paid
+                    to crouch.
+                </h2>
+
+                <p>
+                    This one looked like success. After a long stretch of runs ending
+                    in a heap, the creature started surviving the full 30-second
+                    episode — 99% of the time, against 101 steps for random torque
+                    babble and 610 for a CEM-optimised constant controller. Great.
+                    Except it wasn't standing. It was crouching, about 300 units
+                    tall where standing is 414.
+                </p>
+
+                <p>
+                    The culprit was a safety net. A blow-up guard clamped total reward
+                    to 10 per step, so a diverging simulation couldn't flood training
+                    with enormous numbers. Sensible. But the height term was scaled
+                    by 20, so <em>every single living step hit the cap</em>. Measured
+                    afterwards: 9.99 reward per step, all run long. Standing tall
+                    earned exactly as much as crouching. Height had become
+                    mathematically invisible.
+                </p>
+
+                <p>
+                    So the policy optimised the one thing it could still see — not
+                    falling over — and did that superbly. It wasn't being lazy. It was
+                    being correct, about a reward that was wrong.
+                </p>
+
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/CrawlingMuto.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <span class="media-caption">
+                        ~300 UNITS TALL · STANDING IS 414 · PAID THE SAME EITHER WAY
+                    </span>
+                </div>
+
+                <p>
+                    After the fix, under normal gravity, runs hold about 365 — right
+                    on the 370 target I'd set. Which is what made me raise the target.
+                    Which is how we got <a href="#bug-flying">entry 01</a>.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>A creature that had finally learned to stand.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>A reward clamp sitting below the height term's scale, so every step paid the same.</dd>
+                    </div>
+                    <div>
+                        <dt>Fix</dt>
+                        <dd>Height now ramps from a minimum to a good height instead of saturating, there's a reward for
+                            keeping limbs on the ground, and the clamp scales with the configured maximum.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>Check what a number is actually measuring before celebrating it. Episode length measured
+                            survival. I wanted standing.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 03 RELAX -->
+
+        <section class="case-section dark-section" id="bug-relax">
+
+            <div class="case-section-title">
+                <span>// entry 03</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    The constant with
+                    an expiry date.
+                </h2>
+
+                <p>
+                    The contact solver used to have a relaxation-iteration count. I
+                    tuned it carefully, landed on 8, and moved on. The very next day,
+                    the order of the physics step changed. Nobody re-checked the 8.
+                </p>
+
+                <p>
+                    So it kept doing its job under assumptions that no longer existed:
+                    the creature sank 7.5 cm into the ground at rest, and the contact
+                    forces flickered. When I finally swept it again, the right answer
+                    had become zero. At 0, resting penetration is 0.54 cm — which is
+                    just the 0.5 cm contact slop doing what it's supposed to — and
+                    contact-force flicker dropped by 96%.
+                </p>
+
+                <p>
+                    And a setting whose best value is zero is a setting you don't
+                    need. It's gone from the solver now.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>Slightly mushy feet. Very easy to ignore.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>A tuned value outliving the step ordering it was tuned for.</dd>
+                    </div>
+                    <div>
+                        <dt>Fix</dt>
+                        <dd>Relax iterations 8 → 0, confirmed with a sweep. Then removed entirely.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>Every tuned constant has an expiry date, stamped on the assumptions it was tuned under.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 04 NAN -->
+
+        <section class="case-section" id="bug-nan">
+
+            <div class="case-section-title">
+                <span>// entry 04</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    The NaN
+                    that got away.
+                </h2>
+
+                <p>
+                    Fall detection compared the creature's state against a threshold.
+                    NaN compares false against everything. So a creature whose
+                    simulation had completely diverged sailed straight past the check,
+                    was declared perfectly fine, and training carried on learning
+                    from it.
+                </p>
+
+                <p>
+                    Nothing crashed. Nothing warned. It just quietly learned from
+                    nonsense.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>Training that made no sense, for no visible reason.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>A diverged sim passing fall detection, because every comparison against NaN is false.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>A check that can't fail isn't a check.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 05 UNITS -->
+
+        <section class="case-section dark-section" id="bug-units">
+
+            <div class="case-section-title">
+                <span>// entry 05</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Centimetres.
+                </h2>
+
+                <p>
+                    Unreal thinks in centimetres. Every physics paper I was working
+                    from thinks in metres. Guess how that goes.
+                </p>
+
+                <p>
+                    (For the record: a length off by 100 is bad. Rotational inertia
+                    goes as length squared, so that one's off by ten thousand — and it
+                    still produces motion that looks like <em>something</em>.)
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>Everything subtly, confidently wrong.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>Centimetres meeting metres.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>Pick one unit, and convert exactly once, at the boundary.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 06 RESET -->
+
+        <section class="case-section" id="bug-reset">
+
+            <div class="case-section-title">
+                <span>// entry 06</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Ghosts from
+                    the last episode.
+                </h2>
+
+                <p>
+                    Two smaller ones to round it out. State surviving a reset, so an
+                    episode started out carrying something left over from the one
+                    before it. And joint conventions that were wrong in a way that
+                    still looked plausible — which is the most dangerous kind of
+                    wrong, because nothing about it looks broken.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>Nothing. That was the problem.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>Stale state between episodes, and joint conventions that were plausibly wrong.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>Plausible is not correct. Physics is extremely good at plausible.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- METHOD -->
+
+        <section class="case-section dark-section" id="method">
+
+            <div class="case-section-title">
+                <span>// what all of this changed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    I stopped nudging
+                    parameters.
+                </h2>
+
+                <p>
+                    What actually changed, after all of the above, was how I debug. I
+                    used to nudge parameters until it looked better. Now I write down
+                    what I think is wrong, work out what test would distinguish it
+                    from the alternatives, run <em>that</em>, and only then touch the
+                    code.
+                </p>
+
+                <p>
+                    The flying bug is the cleanest example of it. "It looks like a
+                    jump" was a perfectly reasonable reading of the video. "Airborne
+                    acceleration must equal gravity" is not a reading. It's a test,
+                    and it doesn't care what the video looks like.
+                </p>
+
+                <p>
+                    Slower per attempt. Enormously faster overall. And a lot of those
+                    distinguishing tests stick around afterwards, which is how the
+                    project ended up with a <a href="technical.html#testing">test
+                        suite</a> that checks physics invariants instead of my eyesight.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- NEXT -->
+
+        <section class="case-next">
+
+            <p class="eyebrow">// found another one?</p>
+
+            <h2>
+                Spotted a bug
+                in this page?
+            </h2>
+
+            <p>
+                Tell me. I clearly collect them.
+            </p>
+
+            <a class="button" href="index.html">
+                Back to the story <span>↺</span>
+            </a>
+
+        </section>
+
+
+        <div class="chapters is-footer" role="navigation" aria-label="AgentSolver chapters">
+            <a class="chapter" href="index.html">
+                <span>01 · THE STORY</span>
+                <strong>Why, what, and where it's at</strong>
+                <small>The maths-free version.</small>
+            </a>
+            <a class="chapter" href="technical.html">
+                <span>02 · UNDER THE HOOD</span>
+                <strong>Solver, SIMD, PPO</strong>
+                <small>The actual numbers.</small>
+            </a>
+            <a class="chapter" href="bugs.html" aria-current="page">
+                <span>03 · BUG JOURNAL</span>
+                <strong>It fell over again</strong>
+                <small>You are here.</small>
+            </a>
+        </div>
+
+    </main>
+
+
+    <footer id="contact">
+
+        <div>
+            <p class="eyebrow">// SAY HI</p>
+            <h2>Corentin Watthez</h2>
+        </div>
+
+        <div class="footer-links">
+            <a href="https://github.com/Orabs16">GitHub ↗</a>
+            <a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a>
+            <a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a>
+            <a href="mailto:corentinwatthez@gmail.com">Email ↗</a>
+        </div>
+
+        <p class="copyright">
+            © 2026 Corentin Watthez
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

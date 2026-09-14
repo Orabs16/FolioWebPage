@@ -667,3 +667,10 @@ code {
     align-self: start;
   }
 }
+
+/* a project with more than one page worth linking to */
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 32px;
+}

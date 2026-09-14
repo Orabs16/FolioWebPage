@@ -646,3 +646,509 @@
     padding-left: max(24px, calc((100vw - var(--max)) / 2));
     padding-right: max(24px, calc((100vw - var(--max)) / 2));
 }
+
+
+
+/* =========================================================
+   MULTI-PAGE CASE STUDIES
+   The muscle project outgrew one page. It's split into three
+   (story / under the hood / bug journal) and everything below
+   exists to make that feel like one thing, not three.
+   ========================================================= */
+
+:root {
+    --warn: #ffb454;   /* open bugs */
+    --hot: #ff6b8b;    /* bugs the policy found before I did */
+}
+
+/* body-copy links. The global reset strips all link styling, which is right
+   for nav and wrong for "see the bug journal" in the middle of a paragraph. */
+.case-section-content p a,
+.bug-meta dd a {
+    color: var(--accent);
+    border-bottom: 1px solid rgba(85, 214, 255, .35);
+    transition: border-color .2s ease;
+}
+
+.case-section-content p a:hover,
+.bug-meta dd a:hover {
+    border-color: var(--accent);
+}
+
+/* ---- chapter strip ------------------------------------------------------
+   sits under every hero and again at the very bottom, so you always know
+   which rabbit hole you're in and where the other two are. A div with
+   role=navigation, not a <nav>: style.css styles bare `nav` for the header. */
+
+.chapters {
+    width: min(calc(100% - 48px), var(--max));
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    border-bottom: 1px solid var(--line);
+}
+
+.chapters.is-footer {
+    border-top: 1px solid var(--line);
+}
+
+.chapter {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 30px 28px 32px;
+
+    border-left: 1px solid var(--line);
+
+    transition: background .2s ease;
+}
+
+.chapter:first-child {
+    border-left: none;
+}
+
+/* the bar across the top is the "you are here" marker */
+.chapter::before {
+    content: "";
+
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+
+    height: 2px;
+
+    background: transparent;
+
+    transition: background .2s ease;
+}
+
+.chapter:hover {
+    background: var(--surface);
+}
+
+.chapter:hover::before {
+    background: var(--muted);
+}
+
+.chapter[aria-current="page"] {
+    background: var(--surface);
+}
+
+.chapter[aria-current="page"]::before {
+    background: var(--accent);
+}
+
+.chapter span {
+    color: var(--accent);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .62rem;
+    letter-spacing: .1em;
+}
+
+.chapter strong {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.35rem;
+    line-height: 1.1;
+    letter-spacing: -.03em;
+}
+
+.chapter small {
+    color: var(--muted);
+
+    font-size: .85rem;
+    line-height: 1.45;
+}
+
+/* ---- in-page index --------------------------------------------------- */
+
+.jump-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 40px;
+
+    margin: 55px 0 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.jump-list a {
+    display: flex;
+    gap: 14px;
+
+    padding: 12px 0;
+
+    border-top: 1px solid var(--line);
+
+    color: var(--muted);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+
+    transition: color .2s ease;
+}
+
+.jump-list a span {
+    color: var(--accent);
+}
+
+.jump-list a:hover {
+    color: var(--text);
+}
+
+/* ---- big numbers ------------------------------------------------------ */
+
+.stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    margin: 70px 0 0;
+
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+}
+
+.stat-strip > div {
+    padding: 26px 22px 24px;
+
+    border-left: 1px solid var(--line);
+}
+
+.stat-strip > div:first-child {
+    padding-left: 0;
+    border-left: none;
+}
+
+.stat-strip strong {
+    display: block;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    line-height: 1;
+    letter-spacing: -.05em;
+}
+
+.stat-strip span {
+    display: block;
+
+    margin-top: 10px;
+
+    color: var(--muted);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+/* ---- video I haven't filmed yet ---------------------------------------
+   Same .media-block box as a real clip, so the page layout is already final.
+   To swap one in: delete the .video-slot div and drop a <video> in its place.
+   Each slot has a comment above it with the exact markup and file name. */
+
+.media-block.is-slot {
+    border-style: dashed;
+
+    background:
+        radial-gradient(circle at 50% 42%, rgba(85, 214, 255, .08), transparent 32%),
+        var(--surface);
+}
+
+.video-slot {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+
+    padding: 24px 24px 64px;
+
+    text-align: center;
+}
+
+.video-slot::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    opacity: .2;
+
+    background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.video-slot-icon {
+    position: relative;
+
+    width: 64px;
+    height: 64px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+
+    color: var(--accent);
+}
+
+.video-slot p {
+    position: relative;
+
+    max-width: 46ch;
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.video-slot b {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: var(--accent);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+}
+
+/* ---- bug journal ------------------------------------------------------- */
+
+.bug-tag {
+    display: block;
+    width: fit-content;
+
+    margin-top: 14px;
+    padding: 5px 9px;
+
+    border: 1px solid currentColor;
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .6rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.bug-tag.fixed   { color: var(--accent); }
+.bug-tag.open    { color: var(--warn); }
+.bug-tag.exploit { color: var(--hot); }
+
+.bug-index {
+    margin: 60px 0 0;
+
+    border-top: 1px solid var(--line);
+}
+
+.bug-index a {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    align-items: center;
+    gap: 20px;
+
+    padding: 18px 0;
+
+    border-bottom: 1px solid var(--line);
+}
+
+.bug-index .num {
+    color: var(--muted);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem;
+}
+
+.bug-index .title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: -.02em;
+
+    transition: color .2s ease;
+}
+
+.bug-index a:hover .title {
+    color: var(--accent);
+}
+
+.bug-index .bug-tag {
+    margin-top: 0;
+}
+
+.bug-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 40px;
+
+    margin: 55px 0 0;
+}
+
+.bug-meta > div {
+    padding: 18px 0 20px;
+
+    border-top: 1px solid var(--line);
+}
+
+.bug-meta dt {
+    margin-bottom: 8px;
+
+    color: var(--accent);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.bug-meta dd {
+    margin: 0;
+
+    font-size: .98rem;
+    line-height: 1.55;
+}
+
+/* one subsystem switched off per row, read against gravity. The culprit row
+   is the one that suddenly lands near -200. */
+.bisect-wrap {
+    margin: 55px 0;
+
+    overflow-x: auto;
+}
+
+.bisect {
+    width: 100%;
+    min-width: 460px;
+
+    border-collapse: collapse;
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .74rem;
+}
+
+.bisect caption {
+    caption-side: bottom;
+
+    padding-top: 14px;
+
+    color: var(--muted);
+
+    font-size: .68rem;
+    text-align: left;
+}
+
+.bisect th {
+    padding: 0 0 12px;
+
+    border-bottom: 1px solid var(--line);
+
+    color: var(--accent);
+
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.bisect td {
+    padding: 13px 0;
+
+    border-bottom: 1px solid var(--line);
+
+    color: var(--muted);
+}
+
+.bisect th:last-child,
+.bisect td:last-child {
+    color: var(--text);
+
+    text-align: right;
+    white-space: nowrap;
+}
+
+.bisect tr.is-baseline td:last-child {
+    color: var(--hot);
+}
+
+.bisect tr.is-culprit td {
+    color: var(--text);
+}
+
+.bisect tr.is-culprit td:last-child {
+    color: var(--accent);
+}
+
+/* ---- mobile ---------------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+    .chapters {
+        grid-template-columns: 1fr;
+    }
+
+    .chapter {
+        padding: 22px 20px 24px;
+
+        border-left: none;
+        border-top: 1px solid var(--line);
+    }
+
+    .chapter:first-child {
+        border-top: none;
+    }
+
+    .stat-strip {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-strip > div:nth-child(odd) {
+        padding-left: 0;
+        border-left: none;
+    }
+
+    .stat-strip > div:nth-child(n+3) {
+        border-top: 1px solid var(--line);
+    }
+
+    /* a 16:9 box at phone width is too short to hold the filming brief, so it
+       gets a min-height instead. The aspect-ratio has to go with it: keeping
+       both makes the browser widen the box to honour 16:9 at 300px tall
+       (~533px), which pushed every page 157px past a 400px phone screen. */
+    .media-block.is-slot {
+        aspect-ratio: auto;
+        min-height: 300px;
+    }
+
+    .bug-index a {
+        grid-template-columns: 44px 1fr;
+        gap: 6px 14px;
+    }
+
+    .bug-index .bug-tag {
+        grid-column: 2;
+    }
+
+    .bug-meta {
+        grid-template-columns: 1fr;
+    }
+
+}

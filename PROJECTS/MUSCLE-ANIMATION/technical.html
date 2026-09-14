@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="AgentSolver under the hood — a reduced-coordinate Featherstone solver in C++, AVX2 batched simulation, a global Projected SOR constraint solve, and a hand-written PyTorch PPO talking to Unreal over TCP.">
+
+    <title>AgentSolver: Under the Hood — Corentin Watthez</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../../CSS/style.css">
+    <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
+    <script src="../../JS/video-focus.js" defer></script>
+</head>
+
+<body>
+
+    <header class="site-header">
+        <a class="logo" href="../../index.html">CW<span>.</span></a>
+
+        <nav>
+            <a href="../../index.html#work">Work</a>
+            <a href="../../index.html#about">About</a>
+            <a href="../../index.html#cv">CV</a>
+            <a href="../../index.html#contact">Contact</a>
+        </nav>
+    </header>
+
+
+    <main data-solo-video>
+
+        <!-- HERO -->
+
+        <section class="case-hero">
+
+            <div class="case-hero-copy">
+
+                <p class="eyebrow">
+                    AGENTSOLVER · UNDER THE HOOD · PART 2 OF 3
+                </p>
+
+                <h1>
+                    Where the<br>
+                    <span>maths lives.</span>
+                </h1>
+
+                <p class="case-intro">
+                    This is the page for anyone who read "custom physics solver" and
+                    immediately wanted to know which one, how fast, and how the pieces
+                    fit together. There will be Featherstone. There will be SIMD. There
+                    is exactly one equation, and I'm quite proud of it.
+                </p>
+
+                <div class="case-meta">
+
+                    <div>
+                        <span>DYNAMICS</span>
+                        <strong>Featherstone ABA</strong>
+                    </div>
+
+                    <div>
+                        <span>CONSTRAINTS</span>
+                        <strong>Global Projected SOR</strong>
+                    </div>
+
+                    <div>
+                        <span>SIMD</span>
+                        <strong>AVX2 · 8 lanes</strong>
+                    </div>
+
+                    <div>
+                        <span>LEARNING</span>
+                        <strong>PyTorch PPO · MLP + Mamba</strong>
+                    </div>
+
+                </div>
+
+                <ul class="jump-list">
+                    <li><a href="#muscles"><span>01</span>Giving it muscles</a></li>
+                    <li><a href="#solver"><span>02</span>Writing my own solver</a></li>
+                    <li><a href="#batching"><span>03</span>Parallelising</a></li>
+                    <li><a href="#constraints"><span>04</span>The global solve</a></li>
+                    <li><a href="#learning"><span>05</span>Letting it learn</a></li>
+                    <li><a href="#tooling"><span>06</span>Watching it learn</a></li>
+                    <li><a href="#testing"><span>07</span>Proving it's not lying</a></li>
+                </ul>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHAPTERS -->
+
+        <div class="chapters" role="navigation" aria-label="AgentSolver chapters">
+            <a class="chapter" href="index.html">
+                <span>01 · THE STORY</span>
+                <strong>Why, what, and where it's at</strong>
+                <small>Start here. Minimum maths, maximum monster.</small>
+            </a>
+            <a class="chapter" href="technical.html" aria-current="page">
+                <span>02 · UNDER THE HOOD</span>
+                <strong>Solver, SIMD, PPO</strong>
+                <small>The actual numbers. Featherstone, AVX2, a global constraint solve and a hand-written
+                    trainer.</small>
+            </a>
+            <a class="chapter" href="bugs.html">
+                <span>03 · BUG JOURNAL</span>
+                <strong>It fell over again</strong>
+                <small>Every bug looks identical. Except the one where it flew.</small>
+            </a>
+        </div>
+
+
+
+        <!-- MUSCLES -->
+
+        <section class="case-section" id="muscles">
+
+            <div class="case-section-title">
+                <span>// 01 · giving it muscles</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Turning a skeletal mesh
+                    into a physical creature.
+                </h2>
+
+                <p>
+                    A skeletal mesh knows where its bones are. It has no idea what
+                    any of them weigh, or how hard they can pull. My solver needs
+                    both, so I built an editor workflow for painting mass and muscle
+                    onto the rig.
+                </p>
+
+                <p>
+                    The bit I care about: muscles use authored extension/flexion
+                    strength curves, not one constant torque value. Real muscle is
+                    weakest at the ends of its range — try holding a dumbbell with
+                    your arm fully straight versus at 90°. A single torque number
+                    throws that away and gives you a creature with the same strength
+                    in every pose, which looks exactly as wrong as it sounds.
+                </p>
+
+                <div class="video-frame">
+
+                    <div class="media-block large">
+
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/Mass Muscle.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+
+                        <span class="media-caption">
+                            MUSCLE / MASS AUTHORING TOOL
+                        </span>
+
+                    </div>
+
+                    <svg class="stickman pose-push"></svg>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- SOLVER -->
+
+        <section class="case-section dark-section" id="solver">
+
+            <div class="case-section-title">
+                <span>// 02 · writing my own solver</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    A physics solver
+                    built for batched simulation.
+                </h2>
+
+                <p>
+                    I could have used the engine's constraint solver. But training
+                    means simulating the same creature an enormous number of times,
+                    and a general-purpose solver spends most of its budget on
+                    generality I don't need. So I wrote a reduced-coordinate
+                    Featherstone Articulated Body Algorithm from scratch in C++.
+                </p>
+
+                <p>
+                    Featherstone is one of those algorithms that feels like a magic
+                    trick the first time it works: it gets you forward dynamics in
+                    O(n) without ever building the mass matrix — three sweeps over
+                    the tree and you're done. The topology is a floating 6-DOF root,
+                    then 3-DOF ball joints and 1-DOF yaw joints —
+                    <strong>41 bodies, 68 degrees of freedom.</strong>
+                </p>
+
+                <div class="feature-grid">
+
+                    <div>
+                        <span>01</span>
+                        <h3>Reduced coordinates</h3>
+                        <p>
+                            The body is described by its joint angles, not by 41
+                            free-floating pieces held together with constraints.
+                            Nothing can drift apart, because there is nothing to
+                            drift.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>02</span>
+                        <h3>Featherstone ABA</h3>
+                        <p>
+                            O(n) forward dynamics without ever building the full
+                            mass matrix. The 52-bone rig collapses to a 41-body
+                            tree: the skeleton's bone count and the solver's
+                            topology are two different things.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>03</span>
+                        <h3>Data-oriented state</h3>
+                        <p>
+                            Structure-of-Arrays all the way down, laid out for the
+                            one thing it has to do: process many identical
+                            creatures at once.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- BATCHING -->
+
+        <section class="case-section" id="batching">
+
+            <div class="case-section-title">
+                <span>// 03 · many at once</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Many environments.
+                    One solver.
+                </h2>
+
+                <p>
+                    Here's the thing about RL: it wants an obscene number of
+                    simulated seconds. Running environments one at a time is
+                    hopeless. But every environment has the <em>identical</em>
+                    topology — same bones, same joints, same everything — which
+                    means the work is the same instruction applied to different
+                    numbers. Which is exactly what SIMD is for.
+                </p>
+
+                <p>
+                    So the hot path is AVX2, eight creatures per register, with the
+                    whole batch spread across parallel jobs. The trick itself is
+                    very cool. Working with it was, honestly, a pain — SIMD bugs
+                    don't crash. One lane quietly holds a wrong number and
+                    everything carries on as if nothing happened, so you find out
+                    a week later when the training makes no sense.
+                </p>
+
+                <p>
+                    Which is why the boring scalar version never got deleted. When
+                    the two disagree, the fast one is wrong.
+                </p>
+
+                <div class="media-block is-slot">
+                    <!-- FILM: all 64 creatures of one batch stepping at once, in a grid. Frame timing on screen if possible.
+                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Batch 64.mp4" type="video/mp4"></video> -->
+                    <div class="video-slot">
+                        <span class="video-slot-icon">▶</span>
+                        <p><b>TO FILM</b>All 64 creatures of one batch simulating at once, laid out in a grid.</p>
+                    </div>
+                    <span class="media-caption">
+                        64 CREATURES · ONE SOLVER · EIGHT PER REGISTER
+                    </span>
+                </div>
+
+                <p>
+                    The batch size that actually trains is 64 — not the biggest
+                    number the solver can survive. I measured it: going to 256 buys
+                    about 21% more samples per second, but that's more than my laptop
+                    can sustain reliably over time, and it costs four times the
+                    iteration latency. Bigger looked better; in reality, it isn't.
+                </p>
+
+                <div class="feature-grid">
+
+                    <div>
+                        <span>AVX2</span>
+                        <h3>8-wide SIMD</h3>
+                        <p>
+                            The same physics step, eight creatures at a time, in
+                            one register.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>64</span>
+                        <h3>Environments</h3>
+                        <p>
+                            The batch size training actually uses — chosen by
+                            measurement, not by ambition.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>TEST</span>
+                        <h3>Scalar reference</h3>
+                        <p>
+                            Slow, obvious, and correct. When the fast one disagrees
+                            with it, the fast one is wrong.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- CONSTRAINTS -->
+
+        <section class="case-section dark-section" id="constraints">
+
+            <div class="case-section-title">
+                <span>// 04 · the rewrite that paid off</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    From individual constraints
+                    to a global system.
+                </h2>
+
+                <p>
+                    My first constraint solver went row by row, Gauss-Seidel style.
+                    It worked, in the sense that it produced numbers. It also meant
+                    every constraint was solved in ignorance of the others, and a
+                    foot on the ground had no idea a knee was at its limit.
+                </p>
+
+                <p>
+                    So I threw it out and assembled the whole thing globally —
+                    ground contacts, joint limits and limb self-collisions in one
+                    system, solved with Projected SOR. The neat part is that I never
+                    have to form the mass matrix to build it: I already had an
+                    impulse-response query lying around from the ABA, and that's
+                    exactly what each entry of <code>A = JM⁻¹Jᵀ + R</code> needs.
+                    That's the equation. Told you I was proud of it.
+                </p>
+
+                <div class="architecture">
+
+                    <div class="architecture-node">
+                        <span>CONTACT</span>
+                        <strong>Ground</strong>
+                        <small>41 contact points</small>
+                    </div>
+
+                    <div class="architecture-node">
+                        <span>LIMIT</span>
+                        <strong>Joints</strong>
+                        <small>Joint-limit constraints</small>
+                    </div>
+
+                    <div class="architecture-node">
+                        <span>COLLISION</span>
+                        <strong>Limbs</strong>
+                        <small>Self-collision constraints</small>
+                    </div>
+
+                    <div class="architecture-arrow">→</div>
+
+                    <div class="architecture-node">
+                        <span>A = JM⁻¹Jᵀ + R</span>
+                        <strong>Global system</strong>
+                        <small>Projected SOR</small>
+                    </div>
+
+                </div>
+
+                <p class="architecture-note">
+                    I expected the rewrite to cost me performance in exchange for
+                    correctness. The global solve came out 1.57× <em>cheaper</em>
+                    than the per-row path — while doing 64 solver sweeps against the
+                    old path's 16, because a dense sweep costs no tree traversals.
+                    It also cut peak penetration by more than a third and held the
+                    torso nearly half again as high. To be clear about the claim:
+                    that's the constraint solve, not an end-to-end framerate number.
+                </p>
+
+                <p>
+                    A few solver features along the way didn't survive contact with
+                    reality. They live in the <a href="bugs.html">bug journal</a>, so
+                    this page can stick to what's actually running.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- LEARNING -->
+
+        <section class="case-section" id="learning">
+
+            <div class="case-section-title">
+                <span>// 05 · letting it learn</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Learning to stay upright
+                    before learning to walk.
+                </h2>
+
+                <p>
+                    The learning layer is my own PPO, written in PyTorch: clipped
+                    surrogate, GAE, KL early-stop, advantage normalisation, value
+                    clipping. No RL framework underneath it, which means the numbers
+                    that tell you whether PPO is actually healthy — loss, KL,
+                    entropy — are right there for me to read. If it's wrong, it's
+                    wrong in a way I can see.
+                </p>
+
+                <p>
+                    It runs as a <em>separate process</em>. Python trains, a
+                    headless Unreal commandlet simulates, and the two talk over
+                    TCP on loopback with a small binary framed protocol.
+                </p>
+
+                <div class="learning-flow">
+
+                    <div>PHYSICAL STATE</div>
+                    <span>→</span>
+                    <div>852 OBSERVATIONS</div>
+                    <span>→</span>
+                    <div>TCP</div>
+                    <span>→</span>
+                    <div>PYTORCH PPO</div>
+                    <span>→</span>
+                    <div>68 ACTIONS</div>
+                    <span>→</span>
+                    <div>MUSCLE TORQUES</div>
+                    <span>→</span>
+                    <div>PHYSICS</div>
+
+                </div>
+
+                <p>
+                    Observations: torso orientation and velocity, height error,
+                    joint positions and velocities, contacts. The reward says reach
+                    the target height, keep your limbs on the ground, hold a sensible
+                    pose, and stop flailing — that last one is a torque penalty, and
+                    without it you get a creature that solves standing by vibrating.
+                </p>
+
+                <div class="stat-strip">
+                    <div><strong>852</strong><span>Observations</span></div>
+                    <div><strong>68</strong><span>Actions</span></div>
+                    <div><strong>60 Hz</strong><span>Control rate</span></div>
+                    <div><strong>0</strong><span>RL frameworks</span></div>
+                </div>
+
+                <p>
+                    <br>
+                    Two policy architectures share the same trainer: a 256×256 MLP,
+                    and a pure-PyTorch Mamba with recurrent PPO. The recurrent one is
+                    meaningfully faster early — roughly 20–30% fewer samples to reach
+                    the first survival milestones — and then the two converge once
+                    the episode cap starts to bind.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- TOOLING -->
+
+        <section class="case-section dark-section" id="tooling">
+
+            <div class="case-section-title">
+                <span>// 06 · watching it learn</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Debugging from raw
+                    numbers is a nightmare.
+                </h2>
+
+                <p>
+                    Training gives you a column of floats. Reward up, reward down.
+                    Working out <em>why</em> from that is genuinely awful — you end
+                    up staring at a log file trying to imagine a creature, and you
+                    are always imagining the wrong one.
+                </p>
+
+                <p>
+                    So I built an in-engine tool to just watch the thing. Half of
+                    what looked like a mysterious reward collapse turned out to be
+                    completely obvious the second I could see the creature doing
+                    something stupid.
+                </p>
+
+                <div class="video-frame">
+
+                    <div class="media-block large">
+
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/Agent Solver.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+
+                        <span class="media-caption">
+                            TRAINING / SIMULATION TOOL
+                        </span>
+
+                    </div>
+
+                    <svg class="stickman pose-hang"></svg>
+
+                </div>
+
+                <p>
+                    Training runs entirely outside the editor. The editor panel is a remote
+                    control: it launches the headless run, tails its log, draws the
+                    training curves, and can stop it. Close the editor and training
+                    carries on. The panel even writes out a .bat that reproduces the
+                    identical run with no editor involved.
+                </p>
+
+                <div class="media-block is-slot">
+                    <!-- FILM: screen capture of the training panel: launch a run, headless process starts, curves draw live, then Stop. ~20 s.
+                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Training Panel.mp4" type="video/mp4"></video> -->
+                    <div class="video-slot">
+                        <span class="video-slot-icon">▶</span>
+                        <p><b>TO FILM</b>The training panel: launch a run, watch the curves draw live, hit Stop. About
+                            20 seconds.</p>
+                    </div>
+                    <span class="media-caption">
+                        THE EDITOR IS A REMOTE CONTROL, NOT THE TRAINER
+                    </span>
+                </div>
+
+                <p>
+                    Each run pins its own config to disk, and two hashes stop me
+                    lying to myself: one covers the observation layout and the rig,
+                    the other the full physics and reward setup. A checkpoint that
+                    doesn't match refuses to resume. I added those after losing time
+                    to a run that was quietly training against settings I'd since
+                    changed.
+                </p>
+
+                <p>
+                    And any finished run can come straight back into the engine: pick
+                    it in the panel, hit Play Run, and it exports and plays in the
+                    viewport — MLP or Mamba, running in C++. The MLP path has a test
+                    asserting C++ and PyTorch agree to 1e-4. The Mamba executor is
+                    brand new; an offline replay of a real export matched PyTorch to
+                    1.2e-7, and the in-engine version still has to prove the same.
+                    Otherwise I'd be watching a subtly different creature from the one
+                    that trained, and never know it.
+                </p>
+
+                <div class="media-block is-slot">
+                    <!-- FILM: Play Run — pick a run in the panel, it exports and plays back in the viewport.
+                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Play Run.mp4" type="video/mp4"></video> -->
+                    <div class="video-slot">
+                        <span class="video-slot-icon">▶</span>
+                        <p><b>TO FILM</b>Play Run: pick a finished run in the panel and watch it play back in the
+                            viewport.</p>
+                    </div>
+                    <span class="media-caption">
+                        TRAINED IN PYTORCH · PLAYED BACK IN C++
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- TESTING -->
+
+        <section class="case-section" id="testing">
+
+            <div class="case-section-title">
+                <span>// 07 · proving it is not lying to me</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Every fix used to quietly
+                    break two older ones.
+                </h2>
+
+                <p>
+                    This was the loop I kept falling into: change something, fix the
+                    thing in front of me, silently break something I'd already fixed
+                    last week, and only notice much later once three of those had
+                    stacked up and the whole thing was on fire. Then I get to work
+                    out which of the last twenty changes did it. Not fun.
+                </p>
+
+                <p>
+                    A physics system makes that worse, because a broken change still
+                    produces motion that looks perfectly convincing. Your eyes will
+                    cheerfully sign off on nonsense. So now there are tests, they run
+                    on their own, and I find out I've made a mistake in seconds
+                    instead of a fortnight.
+                </p>
+
+                <p>
+                    The ones I trust most are invariant tests. Momentum has to be
+                    conserved whether or not the result looks nice, so I assert on
+                    that rather than on my own judgement. One of them hangs the real
+                    rig a kilometre up, hits it with full-strength random torques, and
+                    checks that its momentum changes by exactly gravity and nothing
+                    else.
+                </p>
+
+                <div class="feature-grid">
+
+                    <div>
+                        <span>14</span>
+                        <h3>Automation tests</h3>
+                        <p>
+                            Permanent tests covering solver and system behaviour,
+                            alongside a rotating set of temporary diagnostics.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>PARITY</span>
+                        <h3>Fast vs. obvious</h3>
+                        <p>
+                            SIMD against the scalar reference. C++ policy playback
+                            against PyTorch.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>PHYSICS</span>
+                        <h3>Invariant testing</h3>
+                        <p>
+                            Momentum doesn't care about my opinion of how the sim
+                            looks. Best bug-catcher I have.
+                        </p>
+                    </div>
+
+                </div>
+
+                <p>
+                    <br>
+                    The solver also has to pass a stability gate before anything
+                    trains on it: 50 seconds of continuous ground contact with all 41
+                    bodies, under a passive drop and under random torque babble, with
+                    no divergence and no NaNs. That sounds unimpressive until you've
+                    watched a solver explode at second three for a fortnight. It is
+                    also, as the creature later demonstrated, not at all the same
+                    thing as the physics being <em>right</em>.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- NEXT -->
+
+        <section class="case-next">
+
+            <p class="eyebrow">// next</p>
+
+            <h2>
+                Tests catch a lot.
+                Not everything.
+            </h2>
+
+            <p>
+                Everything on this page works. The bug journal is the list of all
+                the times I was sure of that and wrong — including the time the
+                creature found a hole in the physics and flew out of it.
+            </p>
+
+            <a class="button" href="bugs.html">
+                Next: the bug journal <span>→</span>
+            </a>
+
+        </section>
+
+
+        <div class="chapters is-footer" role="navigation" aria-label="AgentSolver chapters">
+            <a class="chapter" href="index.html">
+                <span>01 · THE STORY</span>
+                <strong>Why, what, and where it's at</strong>
+                <small>The maths-free version.</small>
+            </a>
+            <a class="chapter" href="technical.html" aria-current="page">
+                <span>02 · UNDER THE HOOD</span>
+                <strong>Solver, SIMD, PPO</strong>
+                <small>You are here.</small>
+            </a>
+            <a class="chapter" href="bugs.html">
+                <span>03 · BUG JOURNAL</span>
+                <strong>It fell over again</strong>
+                <small>And once, it flew.</small>
+            </a>
+        </div>
+
+    </main>
+
+
+    <footer id="contact">
+
+        <div>
+            <p class="eyebrow">// SAY HI</p>
+            <h2>Corentin Watthez</h2>
+        </div>
+
+        <div class="footer-links">
+            <a href="https://github.com/Orabs16">GitHub ↗</a>
+            <a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a>
+            <a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a>
+            <a href="mailto:corentinwatthez@gmail.com">Email ↗</a>
+        </div>
+
+        <p class="copyright">
+            © 2026 Corentin Watthez
+        </p>
+
+    </footer>
+
+</body>
+
+</html>
