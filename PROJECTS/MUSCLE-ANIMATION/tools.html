@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="AgentSolver tools — an Unreal editor workflow for painting mass and muscle onto a rig, an in-engine training visualizer, a training panel that remote-controls headless runs, and one-click policy playback.">
+
+    <title>AgentSolver: The Tools — Corentin Watthez</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../../CSS/style.css">
+    <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
+    <script src="../../JS/video-focus.js" defer></script>
+</head>
+
+<body>
+
+    <header class="site-header">
+        <a class="logo" href="../../index.html">CW<span>.</span></a>
+
+        <nav>
+            <a href="../../index.html#work">Work</a>
+            <a href="../../index.html#about">About</a>
+            <a href="../../index.html#cv">CV</a>
+            <a href="../../index.html#contact">Contact</a>
+        </nav>
+    </header>
+
+
+    <main data-solo-video>
+
+        <!-- HERO -->
+
+        <section class="case-hero">
+
+            <div class="case-hero-copy">
+
+                <p class="eyebrow">
+                    AGENTSOLVER · THE TOOLS · PART 2 OF 4
+                </p>
+
+                <h1>
+                    Nobody should<br>
+                    have to<br>
+                    <span>read my C++.</span>
+                </h1>
+
+                <p class="case-intro">
+                    A solver nobody can configure is just an expensive crash. These
+                    are the tools that sit between the maths and a human: painting
+                    muscles onto a rig, watching a creature learn, launching training
+                    without babysitting it, and getting the result back into the
+                    viewport in one click.
+                </p>
+
+                <div class="case-meta">
+
+                    <div>
+                        <span>WHERE</span>
+                        <strong>Unreal Editor</strong>
+                    </div>
+
+                    <div>
+                        <span>BUILT FOR</span>
+                        <strong>Humans (mostly me)</strong>
+                    </div>
+
+                    <div>
+                        <span>GOAL</span>
+                        <strong>No config files by hand</strong>
+                    </div>
+
+                </div>
+
+                <ul class="jump-list">
+                    <li><a href="#authoring"><span>01</span>Painting muscles</a></li>
+                    <li><a href="#watching"><span>02</span>Watching it learn</a></li>
+                    <li><a href="#panel"><span>03</span>The training panel</a></li>
+                    <li><a href="#playback"><span>04</span>Play Run</a></li>
+                </ul>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHAPTERS -->
+
+        <div class="chapters" role="navigation" aria-label="AgentSolver chapters">
+            <a class="chapter" href="index.html">
+                <span>01 · THE STORY</span>
+                <strong>Why, what, and where it's at</strong>
+                <small>Start here. Minimum maths, maximum monster.</small>
+            </a>
+            <a class="chapter" href="tools.html" aria-current="page">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles, watching training, and Play Run.</small>
+            </a>
+            <a class="chapter" href="technical.html">
+                <span>03 · UNDER THE HOOD</span>
+                <strong>Solver, SIMD, PPO</strong>
+                <small>The actual numbers. Featherstone, AVX2, a global constraint solve and a hand-written
+                    trainer.</small>
+            </a>
+            <a class="chapter" href="bugs.html">
+                <span>04 · BUG JOURNAL</span>
+                <strong>It fell over again</strong>
+                <small>Every bug looks identical. Except the one where it flew.</small>
+            </a>
+        </div>
+
+
+
+        <!-- AUTHORING -->
+
+        <section class="case-section" id="authoring">
+
+            <div class="case-section-title">
+                <span>// 01 · painting muscles</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Turning a skeletal mesh
+                    into a physical creature.
+                </h2>
+
+                <p>
+                    A skeletal mesh knows where its bones are. It has no idea what
+                    any of them weigh, or how hard they can pull. My solver needs
+                    both, so I built an editor workflow for painting mass and muscle
+                    onto the rig.
+                </p>
+
+                <p>
+                    The bit I care about: muscles use authored extension/flexion
+                    strength curves, not one constant torque value. Real muscle is
+                    weakest at the ends of its range — try holding a dumbbell with
+                    your arm fully straight versus at 90°. A single torque number
+                    throws that away and gives you a creature with the same strength
+                    in every pose, which looks exactly as wrong as it sounds.
+                </p>
+
+                <div class="video-frame">
+
+                    <div class="media-block large">
+
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/Mass Muscle.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+
+                        <span class="media-caption">
+                            MUSCLE / MASS AUTHORING TOOL
+                        </span>
+
+                    </div>
+
+                    <svg class="stickman pose-push"></svg>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- WATCHING -->
+
+        <section class="case-section dark-section" id="watching">
+
+            <div class="case-section-title">
+                <span>// 02 · watching it learn</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Debugging from raw
+                    numbers is a nightmare.
+                </h2>
+
+                <p>
+                    So I built an easier way to see everything, in-engine curves for the different rewards and general data.
+                    I also added support for TensorBoard for more in-depth case studies and, last but not least, a window that shows every muscle activation in real time for the currently displayed run.
+                </p>
+
+                <p>
+                    Of course to make everything fit in one video it's a bit messy here, but having two screens makes it way easier to analyse.
+                    You can see the TensorBoard in the bottom left corner, the activated muscles in the top left corner and the general tool inside of Unreal on your right.
+                </p>
+
+                <div class="video-frame">
+
+                    <div class="media-block large">
+
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/AllDebug.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+
+                        <span class="media-caption">
+                            TRAINING / SIMULATION TOOL
+                        </span>
+
+                    </div>
+
+                    <svg class="stickman pose-hang"></svg>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- PANEL -->
+
+        <section class="case-section" id="panel">
+
+            <div class="case-section-title">
+                <span>// 03 · the training panel</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    A remote control,
+                    not a trainer.
+                </h2>
+
+                <p>
+                    Training runs entirely outside the editor. The editor panel is a
+                    remote control: it launches the headless run, tails its log, draws
+                    the training curves, and can stop it. Close the editor and training
+                    carries on. The panel even writes out a .bat that reproduces the
+                    identical run with no editor involved.
+                </p>
+
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                                <source src="../../ASSET/VIDEO/HeadlessTraining.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            THE EDITOR IS A REMOTE CONTROL, NOT THE TRAINER
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-sit"></svg>
+                </div>
+
+                <p>
+                    Each run pins its own config to disk, and two hashes stop me
+                    lying to myself: one covers the observation layout and the rig,
+                    the other the full physics and reward setup. A checkpoint that
+                    doesn't match refuses to resume. I added those after losing time
+                    to a run that was quietly training against settings I'd since
+                    changed.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- PLAYBACK -->
+
+        <section class="case-section dark-section" id="playback">
+
+            <div class="case-section-title">
+                <span>// 04 · play run</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    From a finished run
+                    to the viewport.
+                </h2>
+
+                <p>
+                    Any finished run can come straight back into the engine: pick it
+                    in the panel, hit Play Run, and it exports and plays in the
+                    viewport — MLP or Mamba, running in C++. The MLP path has a test
+                    asserting C++ and PyTorch agree to 1e-4. The Mamba executor is
+                    brand new; an offline replay of a real export matched PyTorch to
+                    1.2e-7, and the in-engine version still has to prove the same.
+                    Otherwise I'd be watching a subtly different creature from the one
+                    that trained, and never know it.
+                </p>
+
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                                <source src="../../ASSET/VIDEO/PlayInTool.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            TRAINED IN PYTORCH · PLAYED BACK IN C++
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-push"></svg>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- NEXT -->
+
+        <section class="case-next">
+
+            <p class="eyebrow">// next</p>
+
+            <h2>
+                That's the surface.
+                Now the maths.
+            </h2>
+
+            <p>
+                Every button on this page ends up calling a solver I wrote from
+                scratch. If you want to know how that part actually works, it's all
+                under the hood.
+            </p>
+
+            <a class="button" href="technical.html">
+                Next: under the hood <span>→</span>
+            </a>
+
+        </section>
+
+
+        <div class="chapters is-footer" role="navigation" aria-label="AgentSolver chapters">
+            <a class="chapter" href="index.html">
+                <span>01 · THE STORY</span>
+                <strong>Why, what, and where it's at</strong>
+                <small>The maths-free version.</small>
+            </a>
+            <a class="chapter" href="tools.html" aria-current="page">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>You are here.</small>
+            </a>
+            <a class="chapter" href="technical.html">
+                <span>03 · UNDER THE HOOD</span>
+                <strong>Solver, SIMD, PPO</strong>
+                <small>The actual numbers.</small>
+            </a>
+            <a class="chapter" href="bugs.html">
+                <span>04 · BUG JOURNAL</span>
+                <strong>It fell over again</strong>
+                <small>And once, it flew.</small>
+            </a>
+        </div>
+
+    </main>
+
+
+    <footer id="contact">
+
+        <div>
+            <p class="eyebrow">// SAY HI</p>
+            <h2>Corentin Watthez</h2>
+        </div>
+
+        <div class="footer-links">
+            <a href="https://github.com/Orabs16">GitHub ↗</a>
+            <a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a>
+            <a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a>
+            <a href="mailto:corentinwatthez@gmail.com">Email ↗</a>
+        </div>
+
+        <p class="copyright">
+            © 2026 Corentin Watthez
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

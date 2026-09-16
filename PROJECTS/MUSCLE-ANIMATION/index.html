@@ -46,7 +46,7 @@
             <div class="case-hero-copy">
 
                 <p class="eyebrow">
-                    AGENTSOLVER · UNREAL ENGINE 5.6 · PART 1 OF 3
+                    AGENTSOLVER · UNREAL ENGINE 5.6 · PART 1 OF 4
                 </p>
 
                 <h1>
@@ -57,9 +57,9 @@
                 <p class="case-intro">
                     A monster with simulated muscles, a physics solver I wrote from
                     scratch, and a neural network trying to work out how to stand up.
-                    So far it has learned to crouch for money, to stand at 89% of its
-                    full height, and — thanks to one of my bugs — to fly 330 metres
-                    straight up.
+                    So far it has learned to crouch for money, to fly 330 metres
+                    straight up thanks to one of my bugs, and — finally — to stand
+                    up at full height without shaking itself apart.
                 </p>
 
                 <div class="case-meta">
@@ -92,7 +92,7 @@
 
             <div class="video-frame">
                 <video autoplay muted loop playsinline>
-                    <source src="../../ASSET/VIDEO/MUTO Falling.mp4" type="video/mp4">
+                    <source src="../../ASSET/VIDEO/BasicStand.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <svg class="stickman pose-sit"></svg>
@@ -109,14 +109,19 @@
                 <strong>Why, what, and where it's at</strong>
                 <small>Start here. Minimum maths, maximum monster.</small>
             </a>
+            <a class="chapter" href="tools.html">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles, watching training, and Play Run.</small>
+            </a>
             <a class="chapter" href="technical.html">
-                <span>02 · UNDER THE HOOD</span>
+                <span>03 · UNDER THE HOOD</span>
                 <strong>Solver, SIMD, PPO</strong>
                 <small>The actual numbers. Featherstone, AVX2, a global constraint solve and a hand-written
                     trainer.</small>
             </a>
             <a class="chapter" href="bugs.html">
-                <span>03 · BUG JOURNAL</span>
+                <span>04 · BUG JOURNAL</span>
                 <strong>It fell over again</strong>
                 <small>Every bug looks identical. Except the one where it flew.</small>
             </a>
@@ -305,21 +310,33 @@
         <section class="case-section dark-section">
 
             <div class="case-section-title">
-                <span>// 04 · where it stands (mostly)</span>
+                <span>// 04 · where it stands</span>
             </div>
 
             <div class="case-section-content">
 
                 <h2>
-                    Where it actually
-                    is right now.
+                    It stands up.
                 </h2>
 
                 <p>
-                    Under normal gravity, the best runs now hold the creature at about
-                    365 units tall — right on the 370 target I'd set, and roughly 89%
-                    of its full standing height of 414. Not quite standing. A very
-                    long way from falling over.
+                    Under normal gravity, on the ground, with nothing cheating: the
+                    creature reaches its full standing height of 414 units and holds
+                    it. That was the milestone this whole thing was pointed at, and
+                    it took about eighteen months of the creature falling over to get
+                    there.
+                </p>
+
+                <p>
+                    It arrived shaking, though. The first policies that made it all
+                    the way up stood there vibrating, because slamming 68 muscles
+                    between slack and full every tick is a perfectly good way to
+                    balance if nothing stops you. Two changes fixed it: muscle
+                    activation is now smoothed on its way into the solver instead of
+                    taking the raw policy output, and the reward charges for rapid
+                    changes in muscle intensity.
+                    <a href="bugs.html#bug-jitter">Before and after, in the bug
+                        journal.</a>
                 </p>
 
                 <p>
@@ -331,17 +348,18 @@
                         bug journal.</a>
                 </p>
 
-                <div class="media-block is-slot">
-                    <!-- FILM: best normal-gravity policy holding its height over a full episode. A line at 414 (full height) would make the 89% obvious.
-                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Standing 89.mp4" type="video/mp4"></video> -->
-                    <div class="video-slot">
-                        <span class="video-slot-icon">▶</span>
-                        <p><b>TO FILM</b>The best normal-gravity policy holding its height through a whole episode. A
-                            line at full standing height would make the last 11% obvious.</p>
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/BeforeAfterJitter.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            BEFORE / AFTER THE SMOOTHING FIX · FULL HEIGHT, 414 UNITS
+                        </span>
                     </div>
-                    <span class="media-caption">
-                        ~365 UNITS · TARGET 370 · FULL HEIGHT 414
-                    </span>
+
+                    <svg class="stickman pose-push"></svg>
                 </div>
 
                 <div class="status-grid">
@@ -382,10 +400,22 @@
                         <small>Fixed: welding is gone from the solver</small>
                     </div>
 
+                    <div class="status complete">
+                        <span>✓</span>
+                        <strong>Standing at full height</strong>
+                        <small>414 units, on the ground, nothing cheating</small>
+                    </div>
+
+                    <div class="status complete">
+                        <span>✓</span>
+                        <strong>Smoothed muscle activation</strong>
+                        <small>Fixed the jitter, together with a rate penalty</small>
+                    </div>
+
                     <div class="status">
                         <span>→</span>
-                        <strong>Standing at full height</strong>
-                        <small>Next major milestone, on the ground this time</small>
+                        <strong>Shifting its weight</strong>
+                        <small>Next milestone. Then, maybe, a step.</small>
                     </div>
 
                     <div class="status">
@@ -423,36 +453,27 @@
                 </p>
 
                 <p>
-                    I raised the height target to 420. The creature's real standing
-                    height is 413.68. So the top of the reward was physically out of
-                    reach from the ground. And at the same time, a bug in how my
-                    solver welds joints meant the creature could push itself upward
-                    with nothing touching the floor. The policy put those two facts
-                    together long before I did.
+                    I wanted the creature to stand as high as it could, so it learned to go as high as it could.
                 </p>
 
-                <div class="media-block">
-                    <video autoplay muted loop playsinline>
-                        <source src="../../ASSET/VIDEO/FlyingMuto.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <span class="media-caption">
-                        NOT A FEATURE · IT WORKED IT OUT BEFORE I DID
-                    </span>
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/FlyingMuto.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            NOT A FEATURE · IT WORKED IT OUT BEFORE I DID
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-hang"></svg>
                 </div>
 
                 <p>
-                    Played back, it spent 94% of its time with none of its 41 contact
-                    points touching anything, and peaked 330 metres up. Muscles are
-                    internal forces. They should not be able to do that.
-                </p>
-
-                <p>
-                    It's my favourite bug of the whole project, because it's the most
-                    honest thing reinforcement learning ever does to you. A policy is
-                    the most thorough fuzzer you will ever own: if the physics has a
-                    hole anywhere, training will find it faster than any test you
-                    wrote. <a href="bugs.html#bug-flying">The full story — including
+                    From the data on TensorBoard, nothing alarming, but when I opened the custom visualizer I saw it
+                    exploiting this bug that I didn't even know existed. <br>
+                     <a href="bugs.html#bug-flying">The full story — including
                         how I bisected it — is in the bug journal.</a>
                 </p>
 
@@ -508,15 +529,15 @@
             <p class="eyebrow">// 07 · next</p>
 
             <h2>
-                Stand up.
-                Stay on the ground.
+                It's standing.
+                Now make it move.
             </h2>
 
             <p>
                 One creature, standing, on purpose, at full height, with both the
-                reward and the physics telling the truth. That's the whole next
-                milestone. After that it gets to shift its weight, then take a step,
-                and if it ever walks I will be insufferable about it.
+                reward and the physics telling the truth — that box is ticked. Next
+                it gets to shift its weight, then take a step, and if it ever walks
+                I will be insufferable about it.
             </p>
 
             <p>
@@ -525,8 +546,8 @@
                 is fun. Learning something an animator can actually use is the point.
             </p>
 
-            <a class="button" href="technical.html">
-                Next: under the hood <span>→</span>
+            <a class="button" href="tools.html">
+                Next: the tools <span>→</span>
             </a>
 
         </section>
@@ -538,13 +559,18 @@
                 <strong>Why, what, and where it's at</strong>
                 <small>You are here.</small>
             </a>
+            <a class="chapter" href="tools.html">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles, watching training, and Play Run.</small>
+            </a>
             <a class="chapter" href="technical.html">
-                <span>02 · UNDER THE HOOD</span>
+                <span>03 · UNDER THE HOOD</span>
                 <strong>Solver, SIMD, PPO</strong>
                 <small>The actual numbers.</small>
             </a>
             <a class="chapter" href="bugs.html">
-                <span>03 · BUG JOURNAL</span>
+                <span>04 · BUG JOURNAL</span>
                 <strong>It fell over again</strong>
                 <small>And once, it flew.</small>
             </a>

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../../CSS/style.css">
     <link rel="stylesheet" href="../../CSS/case-study.css">
     <script src="../../JS/stickman.js" defer></script>
+    <script src="../../JS/code-highlight.js" defer></script>
 </head>
 
 <body>
@@ -145,6 +146,36 @@
                 <p class="architecture-note">The cost is that reading a voxel is now a shift and a mask instead of an
                     array index. Worth it, and the whole coarse cell lands in cache in one go, which the search
                     is quietly grateful for.</p>
+                <p>Here's the bake side of it. Walk the 64 sub-voxels of one coarse cell, ask physics two
+                    questions about each, and drop the answer into bit <code>i</code> of a <code>ulong</code>.
+                    Most voxels are floating in open air, so "is anything even near me?" goes first and
+                    throws most of them out before the second question gets asked.</p>
+                <div class="code-window">
+                    <div class="code-head"><span>DetectCollision</span><span>C# · once per cell · bake time</span></div>
+<pre class="code-block"><code data-lang="csharp">private ulong DetectCollision(int3 position)
+{
+    ulong result = 0;
+    for (int i = 0; i &lt; PathfindingHolder.DATASTRUCTSIZE; i++)
+    {
+        int3 localPosition = position * PathfindingHolder.SUBDIVIDEBOX
+                             + new int3(i % PathfindingHolder.SUBDIVIDEBOX,
+                                        (i / PathfindingHolder.SUBDIVIDEBOX) % PathfindingHolder.SUBDIVIDEBOX,
+                                        i / (PathfindingHolder.SUBDIVIDEBOX * PathfindingHolder.SUBDIVIDEBOX));
+
+        float3 worldPosition = PathfindingUtilities.FindWorldPosition(localPosition, holder);
+        // not too far from something
+        bool notTooFar = Physics.CheckBox(worldPosition, Vector3.one * holder._maxDistanceFromWall / 2,
+                                          Quaternion.identity, CollisionMask, QueryTriggerInteraction.Ignore);
+        if (!notTooFar) continue;
+        // not inside of something
+        bool notInside = !Physics.CheckBox(worldPosition, Vector3.one * holder._voxelSize / 2,
+                                           Quaternion.identity, CollisionMask, QueryTriggerInteraction.Ignore);
+        if (notInside) result |= 1ul &lt;&lt; i;
+    }
+    return result;
+}</code></pre>
+                </div>
+                <p class="code-caption">i → (x, y, z) is just base-4 digits: i % 4, (i / 4) % 4, i / 16.</p>
             </div>
         </section>
 
@@ -158,6 +189,69 @@
                     where managed collections aren't invited anyway.</p>
                 <p>Every voxel has 26 neighbours in 3D, not 4 or 6. All of them are searched, so an agent can
                     cut a proper diagonal through a room instead of doing that unmistakable staircase shuffle.</p>
+                <p>Here's the heap. It's built on a <code>NativeList</code> so it can live inside a Burst
+                    job. Instead of swapping a node with its parent at every level, it slides a hole
+                    up or down and writes the node exactly once, when it finally lands.</p>
+                <div class="code-window">
+                    <div class="code-head"><span>MinHeap</span><span>C# · Burst · the open set</span></div>
+<pre class="code-block"><code data-lang="csharp">[BurstCompile]
+public static class MinHeap
+{
+    public static void Push(ref NativeList&lt;PathNode&gt; heap, in PathNode node)
+    {
+        int i = heap.Length;
+        heap.Add(node);
+
+        while (i &gt; 0)
+        {
+            int parent = (i - 1) &gt;&gt; 1;
+            if (heap[parent].total &lt;= node.total)
+                break;
+
+            heap[i] = heap[parent];
+            i = parent;
+        }
+
+        heap[i] = node;
+    }
+
+    public static PathNode Pop(ref NativeList&lt;PathNode&gt; heap)
+    {
+        PathNode root = heap[0];
+        int last = heap.Length - 1;
+        PathNode node = heap[last];
+        heap.RemoveAt(last);
+
+        if (last &gt; 0)
+        {
+            int i = 0;
+            int half = last &gt;&gt; 1;
+
+            while (i &lt; half)
+            {
+                int left = (i &lt;&lt; 1) + 1;
+                int right = left + 1;
+
+                int smallest = (right &lt; last &amp;&amp; heap[right].total &lt; heap[left].total)
+                    ? right
+                    : left;
+
+                if (heap[smallest].total &gt;= node.total)
+                    break;
+
+                heap[i] = heap[smallest];
+                i = smallest;
+            }
+
+            heap[i] = node;
+        }
+
+        return root;
+    }
+}</code></pre>
+                </div>
+                <p class="code-caption">No decrease-key: a cheaper route just pushes the node again, and the stale
+                    copy gets skipped when it's popped. Lazy, and faster for it.</p>
                 <div class="feature-grid">
                     <div><span>01</span>
                         <h3>Binary min-heap</h3>

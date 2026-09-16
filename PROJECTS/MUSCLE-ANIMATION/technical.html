@@ -46,7 +46,7 @@
             <div class="case-hero-copy">
 
                 <p class="eyebrow">
-                    AGENTSOLVER · UNDER THE HOOD · PART 2 OF 3
+                    AGENTSOLVER · UNDER THE HOOD · PART 3 OF 4
                 </p>
 
                 <h1>
@@ -57,8 +57,7 @@
                 <p class="case-intro">
                     This is the page for anyone who read "custom physics solver" and
                     immediately wanted to know which one, how fast, and how the pieces
-                    fit together. There will be Featherstone. There will be SIMD. There
-                    is exactly one equation, and I'm quite proud of it.
+                    fit together. There will be Featherstone. There will be SIMD. 
                 </p>
 
                 <div class="case-meta">
@@ -86,13 +85,11 @@
                 </div>
 
                 <ul class="jump-list">
-                    <li><a href="#muscles"><span>01</span>Giving it muscles</a></li>
-                    <li><a href="#solver"><span>02</span>Writing my own solver</a></li>
-                    <li><a href="#batching"><span>03</span>Parallelising</a></li>
-                    <li><a href="#constraints"><span>04</span>The global solve</a></li>
-                    <li><a href="#learning"><span>05</span>Letting it learn</a></li>
-                    <li><a href="#tooling"><span>06</span>Watching it learn</a></li>
-                    <li><a href="#testing"><span>07</span>Proving it's not lying</a></li>
+                    <li><a href="#solver"><span>01</span>Writing my own solver</a></li>
+                    <li><a href="#batching"><span>02</span>Parallelising</a></li>
+                    <li><a href="#constraints"><span>03</span>The global solve</a></li>
+                    <li><a href="#learning"><span>04</span>Letting it learn</a></li>
+                    <li><a href="#testing"><span>05</span>Proving it's not lying</a></li>
                 </ul>
 
             </div>
@@ -108,14 +105,19 @@
                 <strong>Why, what, and where it's at</strong>
                 <small>Start here. Minimum maths, maximum monster.</small>
             </a>
+            <a class="chapter" href="tools.html">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles, watching training, and Play Run.</small>
+            </a>
             <a class="chapter" href="technical.html" aria-current="page">
-                <span>02 · UNDER THE HOOD</span>
+                <span>03 · UNDER THE HOOD</span>
                 <strong>Solver, SIMD, PPO</strong>
                 <small>The actual numbers. Featherstone, AVX2, a global constraint solve and a hand-written
                     trainer.</small>
             </a>
             <a class="chapter" href="bugs.html">
-                <span>03 · BUG JOURNAL</span>
+                <span>04 · BUG JOURNAL</span>
                 <strong>It fell over again</strong>
                 <small>Every bug looks identical. Except the one where it flew.</small>
             </a>
@@ -123,68 +125,12 @@
 
 
 
-        <!-- MUSCLES -->
-
-        <section class="case-section" id="muscles">
-
-            <div class="case-section-title">
-                <span>// 01 · giving it muscles</span>
-            </div>
-
-            <div class="case-section-content">
-
-                <h2>
-                    Turning a skeletal mesh
-                    into a physical creature.
-                </h2>
-
-                <p>
-                    A skeletal mesh knows where its bones are. It has no idea what
-                    any of them weigh, or how hard they can pull. My solver needs
-                    both, so I built an editor workflow for painting mass and muscle
-                    onto the rig.
-                </p>
-
-                <p>
-                    The bit I care about: muscles use authored extension/flexion
-                    strength curves, not one constant torque value. Real muscle is
-                    weakest at the ends of its range — try holding a dumbbell with
-                    your arm fully straight versus at 90°. A single torque number
-                    throws that away and gives you a creature with the same strength
-                    in every pose, which looks exactly as wrong as it sounds.
-                </p>
-
-                <div class="video-frame">
-
-                    <div class="media-block large">
-
-                        <video autoplay muted loop playsinline>
-                            <source src="../../ASSET/VIDEO/Mass Muscle.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-
-                        <span class="media-caption">
-                            MUSCLE / MASS AUTHORING TOOL
-                        </span>
-
-                    </div>
-
-                    <svg class="stickman pose-push"></svg>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
         <!-- SOLVER -->
 
-        <section class="case-section dark-section" id="solver">
+        <section class="case-section" id="solver">
 
             <div class="case-section-title">
-                <span>// 02 · writing my own solver</span>
+                <span>// 01 · writing my own solver</span>
             </div>
 
             <div class="case-section-content">
@@ -255,10 +201,10 @@
 
         <!-- BATCHING -->
 
-        <section class="case-section" id="batching">
+        <section class="case-section dark-section" id="batching">
 
             <div class="case-section-title">
-                <span>// 03 · many at once</span>
+                <span>// 02 · many at once</span>
             </div>
 
             <div class="case-section-content">
@@ -291,16 +237,18 @@
                     the two disagree, the fast one is wrong.
                 </p>
 
-                <div class="media-block is-slot">
-                    <!-- FILM: all 64 creatures of one batch stepping at once, in a grid. Frame timing on screen if possible.
-                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Batch 64.mp4" type="video/mp4"></video> -->
-                    <div class="video-slot">
-                        <span class="video-slot-icon">▶</span>
-                        <p><b>TO FILM</b>All 64 creatures of one batch simulating at once, laid out in a grid.</p>
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                                <source src="../../ASSET/VIDEO/64Env.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            64 CREATURES · ONE SOLVER · EIGHT PER REGISTER
+                        </span>
                     </div>
-                    <span class="media-caption">
-                        64 CREATURES · ONE SOLVER · EIGHT PER REGISTER
-                    </span>
+
+                    <svg class="stickman pose-hang"></svg>
                 </div>
 
                 <p>
@@ -350,10 +298,10 @@
 
         <!-- CONSTRAINTS -->
 
-        <section class="case-section dark-section" id="constraints">
+        <section class="case-section" id="constraints">
 
             <div class="case-section-title">
-                <span>// 04 · the rewrite that paid off</span>
+                <span>// 03 · the rewrite that paid off</span>
             </div>
 
             <div class="case-section-content">
@@ -434,10 +382,10 @@
 
         <!-- LEARNING -->
 
-        <section class="case-section" id="learning">
+        <section class="case-section dark-section" id="learning">
 
             <div class="case-section-title">
-                <span>// 05 · letting it learn</span>
+                <span>// 04 · letting it learn</span>
             </div>
 
             <div class="case-section-content">
@@ -484,8 +432,11 @@
                     Observations: torso orientation and velocity, height error,
                     joint positions and velocities, contacts. The reward says reach
                     the target height, keep your limbs on the ground, hold a sensible
-                    pose, and stop flailing — that last one is a torque penalty, and
-                    without it you get a creature that solves standing by vibrating.
+                    pose, and stop flailing — that last one is a torque penalty plus a
+                    cost on rapid changes in muscle intensity. Without those, and
+                    without smoothing activation before it reaches the solver, you get
+                    a creature that solves standing by vibrating.
+                    <a href="bugs.html#bug-jitter">Which it did, for a while.</a>
                 </p>
 
                 <div class="stat-strip">
@@ -504,113 +455,10 @@
                     the episode cap starts to bind.
                 </p>
 
-            </div>
-
-        </section>
-
-
-
-        <!-- TOOLING -->
-
-        <section class="case-section dark-section" id="tooling">
-
-            <div class="case-section-title">
-                <span>// 06 · watching it learn</span>
-            </div>
-
-            <div class="case-section-content">
-
-                <h2>
-                    Debugging from raw
-                    numbers is a nightmare.
-                </h2>
-
                 <p>
-                    Training gives you a column of floats. Reward up, reward down.
-                    Working out <em>why</em> from that is genuinely awful — you end
-                    up staring at a log file trying to imagine a creature, and you
-                    are always imagining the wrong one.
+                    Launching, watching and replaying all of this happens through the
+                    editor, and that's on <a href="tools.html">the tools page</a>.
                 </p>
-
-                <p>
-                    So I built an in-engine tool to just watch the thing. Half of
-                    what looked like a mysterious reward collapse turned out to be
-                    completely obvious the second I could see the creature doing
-                    something stupid.
-                </p>
-
-                <div class="video-frame">
-
-                    <div class="media-block large">
-
-                        <video autoplay muted loop playsinline>
-                            <source src="../../ASSET/VIDEO/Agent Solver.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-
-                        <span class="media-caption">
-                            TRAINING / SIMULATION TOOL
-                        </span>
-
-                    </div>
-
-                    <svg class="stickman pose-hang"></svg>
-
-                </div>
-
-                <p>
-                    Training runs entirely outside the editor. The editor panel is a remote
-                    control: it launches the headless run, tails its log, draws the
-                    training curves, and can stop it. Close the editor and training
-                    carries on. The panel even writes out a .bat that reproduces the
-                    identical run with no editor involved.
-                </p>
-
-                <div class="media-block is-slot">
-                    <!-- FILM: screen capture of the training panel: launch a run, headless process starts, curves draw live, then Stop. ~20 s.
-                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Training Panel.mp4" type="video/mp4"></video> -->
-                    <div class="video-slot">
-                        <span class="video-slot-icon">▶</span>
-                        <p><b>TO FILM</b>The training panel: launch a run, watch the curves draw live, hit Stop. About
-                            20 seconds.</p>
-                    </div>
-                    <span class="media-caption">
-                        THE EDITOR IS A REMOTE CONTROL, NOT THE TRAINER
-                    </span>
-                </div>
-
-                <p>
-                    Each run pins its own config to disk, and two hashes stop me
-                    lying to myself: one covers the observation layout and the rig,
-                    the other the full physics and reward setup. A checkpoint that
-                    doesn't match refuses to resume. I added those after losing time
-                    to a run that was quietly training against settings I'd since
-                    changed.
-                </p>
-
-                <p>
-                    And any finished run can come straight back into the engine: pick
-                    it in the panel, hit Play Run, and it exports and plays in the
-                    viewport — MLP or Mamba, running in C++. The MLP path has a test
-                    asserting C++ and PyTorch agree to 1e-4. The Mamba executor is
-                    brand new; an offline replay of a real export matched PyTorch to
-                    1.2e-7, and the in-engine version still has to prove the same.
-                    Otherwise I'd be watching a subtly different creature from the one
-                    that trained, and never know it.
-                </p>
-
-                <div class="media-block is-slot">
-                    <!-- FILM: Play Run — pick a run in the panel, it exports and plays back in the viewport.
-                     swap: <video autoplay muted loop playsinline><source src="../../ASSET/VIDEO/Play Run.mp4" type="video/mp4"></video> -->
-                    <div class="video-slot">
-                        <span class="video-slot-icon">▶</span>
-                        <p><b>TO FILM</b>Play Run: pick a finished run in the panel and watch it play back in the
-                            viewport.</p>
-                    </div>
-                    <span class="media-caption">
-                        TRAINED IN PYTORCH · PLAYED BACK IN C++
-                    </span>
-                </div>
 
             </div>
 
@@ -623,7 +471,7 @@
         <section class="case-section" id="testing">
 
             <div class="case-section-title">
-                <span>// 07 · proving it is not lying to me</span>
+                <span>// 05 · proving it is not lying to me</span>
             </div>
 
             <div class="case-section-content">
@@ -708,7 +556,7 @@
 
         <!-- NEXT -->
 
-        <section class="case-next">
+        <section class="case-next dark-section">
 
             <p class="eyebrow">// next</p>
 
@@ -736,13 +584,18 @@
                 <strong>Why, what, and where it's at</strong>
                 <small>The maths-free version.</small>
             </a>
+            <a class="chapter" href="tools.html">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles and Play Run.</small>
+            </a>
             <a class="chapter" href="technical.html" aria-current="page">
-                <span>02 · UNDER THE HOOD</span>
+                <span>03 · UNDER THE HOOD</span>
                 <strong>Solver, SIMD, PPO</strong>
                 <small>You are here.</small>
             </a>
             <a class="chapter" href="bugs.html">
-                <span>03 · BUG JOURNAL</span>
+                <span>04 · BUG JOURNAL</span>
                 <strong>It fell over again</strong>
                 <small>And once, it flew.</small>
             </a>

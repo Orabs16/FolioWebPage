@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="CSS/style.css">
   <script src="JS/stickman.js" defer></script>
   <script src="JS/video-focus.js" defer></script>
+  <script src="JS/reel-sound.js" defer></script>
 </head>
 
 <body>
@@ -29,54 +30,52 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" data-solo-video>
       <div class="hero-copy">
         <p class="eyebrow">TECHNICAL ANIMATOR · PROCEDURAL ANIMATION</p>
-        <h1>Welcome to <br><span>my strange<br>workshop</span></h1>
+        <h1>Welcome to my <span>strange workshop</span></h1>
         <p class="hero-intro">
-          Experimenting with tools, maths and tech animation,<br>
-          and, most importantly, weird creatures.
+          I'm a technical animator who builds tools and procedural animation systems.
+          You'll see here some of my experiments.
         </p>
-        <a class="button" href="#work">Go look at the weird stuff <span>↓</span></a>
       </div>
 
-      <div class="hero-card">
-        <p class="hero-card-title">// what you've wandered into</p>
-        <dl class="readout">
-          <div><dt>this place</dt>
-            <dd>a small workshop for creatures that don't move right yet</dd>
-          </div>
-          <div><dt>current patient</dt>
-            <dd>a muscle-simulated monster, mid-training</dd>
-          </div>
-          <div><dt>the method</dt>
-            <dd>real physics, not animation curves</dd>
-          </div>
-          <div><dt>the vibe</dt>
-            <dd>equal parts science and stubbornness</dd>
-          </div>
-          <div class="pending"><dt>standing</dt>
-            <dd>89% of the way (also, briefly, flying)</dd>
-          </div>
-        </dl>
+      <div class="hero-reel video-frame">
+        <div class="reel-media">
+          <div class="media-label">// THE SHOWREEL</div>
+
+          <video autoplay muted loop playsinline preload="metadata"
+            aria-label="Showreel — procedural animation, physics solvers and rigging tools">
+            <source src="ASSET/VIDEO/ShowrealV1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+
+          <button class="reel-sound" type="button" data-reel-sound aria-pressed="false">
+            <span aria-hidden="true">♪</span> sound off
+          </button>
+
+          <div class="media-corner">REEL V1 · 2026</div>
+        </div>
+        <svg class="stickman pose-sit"></svg>
       </div>
+
     </section>
 
     <section id="work" class="section" data-solo-video>
       <div class="section-heading">
         <div>
           <p class="eyebrow">// THINGS I BUILT</p>
-          <h2>Solvers, tools, and one monster<br>that still refuses to stand up.</h2>
+          <h2>Solvers, tools, and one monster<br>trying to stand up.</h2>
         </div>
       </div>
 
       <article class="project-row">
         <div class="video-frame">
           <div class="project-media">
-            <div class="media-label">IT FALLS OVER. THAT PART WORKS.</div>
+            <div class="media-label">IT STANDS. THAT PART WORKS.</div>
 
             <video autoplay muted loop playsinline>
-              <source src="ASSET/VIDEO/MUTO Falling.mp4" type="video/mp4">
+              <source src="ASSET/VIDEO/BasicStand.mp4" type="video/mp4">
               Your browser does not support the video tag.
             </video>
 
@@ -90,13 +89,10 @@
           <p>
             I wanted to know whether a creature could learn to stand using muscles
             instead of animation curves. So I wrote the physics solver. Then the
-            muscle authoring tools. Then the PPO trainer, after deleting the
-            off-the-shelf one for hiding its own numbers from me.
+            muscle authoring tools. Then the PPO trainer to get more useful information about all the data.
           </p>
           <p>
-            It stands at about 89% of its full height now. Then I set the target
-            taller than it actually is, and it found a bug in my physics that let
-            it fly 330 metres straight up instead.
+            It stands at full height now, but for walking, I'll need a bit more time (same for him, he's still a baby).
           </p>
           <div class="tags">
             <span>Unreal Engine</span>
@@ -107,8 +103,9 @@
             <span>PPO</span>
           </div>
           <div class="project-links">
-            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">Read the whole rabbit hole <span>↗</span></a>
-            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/bugs.html">Or skip to the bugs <span>↗</span></a>
+            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/index.html">Read more <span>↗</span></a>
+            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/technical.html">behind the scenes <span>↗</span></a>
+            <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/tools.html">or artist friendly <span>↗</span></a>
           </div>
         </div>
       </article>
@@ -159,8 +156,7 @@
           <h3>The spider that<br>started all this</h3>
           <p>
             My first go at rigging and procedural behaviour. Eight legs, and the
-            realisation that hand-keying a spider is a punishment, and that I would
-            rather make the computer do it.
+            realisation that making procedural animation systems is fun.
           </p>
           <div class="tags"><span>Maya</span><span>Unity</span><span>Rigging</span></div>
           <a class="text-link" href="https://www.artstation.com/artwork/eRRg83">On ArtStation <span>↗</span></a>
@@ -173,37 +169,33 @@
       <div class="section-heading">
         <div>
           <p class="eyebrow">// WHOAMI</p>
-          <h2>I'd rather spend a week on the tool<br>than a day on the animation.</h2>
+          <h2>I'd rather spend a week on the tool<br>than a day doing it by hand.</h2>
         </div>
       </div>
 
       <div class="about-grid">
         <div>
           <p class="large-copy">
-            I'm Corentin. Technical animator — which mostly means I'm the person
-            you ask "can the character do this?", and I disappear for a while and
-            come back with a tool.
+            I'm Corentin. Technical animator and tool programmer.
           </p>
           <p>
-            I like the part of animation that turns into maths. Joint conventions,
-            solver stability, why the units are wrong, whether a NaN is sneaking
-            past the fall detection. I will happily read a robotics paper from the
-            eighties to make a monster shift its weight convincingly, and I think
-            that is a completely reasonable trade.
+            I like to make procedural systems for animation or just general-purpose ones. Diving into maths and logic to
+            automate all sorts of things. And finding new ways to achieve our goals. Thanks to my internship at Ubisoft
+            Annecy where I worked on procedural animation, I learned a lot about it but also about how AAA game companies work.
           </p>
           <p>
             The other half of the job is making sure nobody else has to care about
-            any of that. A solver nobody can configure is just an expensive crash.
+            any of that. Creating tools that everyone can use.
           </p>
         </div>
         <div class="toolbox">
           <p class="eyebrow">WHAT I ACTUALLY USE</p>
           <div class="skill-group">
             <span>DAILY, WITHOUT THINKING</span>
-            <strong>Unreal Engine · Unity · C# · rigging &amp; procedural animation</strong>
+            <strong>Unreal Engine · Unity · C# · procedural animation</strong>
           </div>
           <div class="skill-group">
-            <span>WHERE I GO WHEN IT GETS INTERESTING</span>
+            <span>WHAT I'M RESEARCHING</span>
             <strong>C++ · SIMD intrinsics · articulated-body dynamics · constraint
               solvers · PyTorch · PPO</strong>
           </div>
@@ -218,7 +210,7 @@
     <section id="cv" class="section cv">
       <div>
         <p class="eyebrow">// THE PDF VERSION</p>
-        <h2>Same person,<br>fewer jokes.</h2>
+        <h2>Same person,<br>more formal.</h2>
       </div>
       <a class="button" href="ASSET/WatthezCorentinResume.pdf" download>Download CV <span>↓</span></a>
     </section>
@@ -239,7 +231,7 @@
       <a href="mailto:corentinwatthez@gmail.com">Email ↗</a>
     </div>
     <p class="copyright">
-      © 2026 Corentin Watthez — PS : Try clicking on the stickman ;)
+      © 2026 Corentin Watthez — PS: Try clicking on the stickman ;)
     </p>
   </footer>
 </body>

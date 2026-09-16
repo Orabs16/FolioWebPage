@@ -46,7 +46,7 @@
             <div class="case-hero-copy">
 
                 <p class="eyebrow">
-                    AGENTSOLVER · BUG JOURNAL · PART 3 OF 3
+                    AGENTSOLVER · BUG JOURNAL · PART 4 OF 4
                 </p>
 
                 <h1>
@@ -64,7 +64,7 @@
 
                     <div>
                         <span>ENTRIES</span>
-                        <strong>6</strong>
+                        <strong>7</strong>
                     </div>
 
                     <div>
@@ -97,14 +97,19 @@
                 <strong>Why, what, and where it's at</strong>
                 <small>Start here. Minimum maths, maximum monster.</small>
             </a>
+            <a class="chapter" href="tools.html">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles, watching training, and Play Run.</small>
+            </a>
             <a class="chapter" href="technical.html">
-                <span>02 · UNDER THE HOOD</span>
+                <span>03 · UNDER THE HOOD</span>
                 <strong>Solver, SIMD, PPO</strong>
                 <small>The actual numbers. Featherstone, AVX2, a global constraint solve and a hand-written
                     trainer.</small>
             </a>
             <a class="chapter" href="bugs.html" aria-current="page">
-                <span>03 · BUG JOURNAL</span>
+                <span>04 · BUG JOURNAL</span>
                 <strong>It fell over again</strong>
                 <small>Every bug looks identical. Except the one where it flew.</small>
             </a>
@@ -146,6 +151,8 @@
                             class="bug-tag fixed">Fixed</span></a>
                     <a href="#bug-reset"><span class="num">06</span><span class="title">Ghosts from the last
                             episode</span><span class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-jitter"><span class="num">07</span><span class="title">It stood up, and
+                            shook</span><span class="bug-tag fixed">Fixed</span></a>
                 </div>
 
             </div>
@@ -201,14 +208,18 @@
                     could ever reach. Maybe I underestimated the learning process, haha.
                 </p>
 
-                <div class="media-block">
-                    <video autoplay muted loop playsinline>
-                        <source src="../../ASSET/VIDEO/FlyingMuto.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <span class="media-caption">
-                        I ASKED FOR STANDING
-                    </span>
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/FlyingMuto.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            I ASKED FOR STANDING
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-push"></svg>
                 </div>
 
                 <p>
@@ -355,14 +366,18 @@
                     being correct, about a reward that was wrong.
                 </p>
 
-                <div class="media-block">
-                    <video autoplay muted loop playsinline>
-                        <source src="../../ASSET/VIDEO/CrawlingMuto.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <span class="media-caption">
-                        ~300 UNITS TALL · STANDING IS 414 · PAID THE SAME EITHER WAY
-                    </span>
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/CrawlingMuto.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            ~300 UNITS TALL · STANDING IS 414 · PAID THE SAME EITHER WAY
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-hang"></svg>
                 </div>
 
                 <p>
@@ -600,6 +615,104 @@
         </section>
 
 
+        <!-- 07 JITTER -->
+
+        <section class="case-section dark-section" id="bug-jitter">
+
+            <div class="case-section-title">
+                <span>// entry 07</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    It stood up.
+                    It would not stop shaking.
+                </h2>
+
+                <p>
+                    This is the good news entry, and it still took a fix. The creature
+                    finally got to full height — past 414, the whole thing, on the
+                    ground, on purpose. And it stood there vibrating like a washing
+                    machine on a bad floor.
+                </p>
+
+                <p>
+                    Nothing was wrong, exactly. The policy outputs 68 muscle
+                    activations every control tick, and I was feeding those numbers
+                    straight into the solver as-is. A muscle could go from slack to
+                    full clench and back inside two ticks, because nothing in the
+                    system said it couldn't. Real muscle can't do that. Mine had no
+                    idea it wasn't allowed to.
+                </p>
+
+                <p>
+                    Worse, that's a perfectly good way to balance. Buzzing at 60 Hz
+                    is a stable strategy: over-correct, over-correct back, never
+                    actually fall. The reward was paying for height and for staying
+                    upright, and shaking delivered both. So it shook.
+                </p>
+
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline>
+                            <source src="../../ASSET/VIDEO/BeforeAfterJitter.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            BEFORE / AFTER · SAME HEIGHT · ONE OF THEM IS WATCHABLE
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-sit"></svg>
+                </div>
+
+                <p>
+                    The fix came from both ends at once, which is why it worked. On the
+                    physics side, muscle activation is now smoothed on its way into the
+                    solver instead of using the raw policy output — a muscle ramps
+                    toward what it's told rather than teleporting there. On the reward
+                    side, rapid changes in muscle intensity now cost something, so the
+                    policy is charged for the thing it was previously getting for free.
+                </p>
+
+                <p>
+                    Either one alone half-works. Smoothing without the penalty just
+                    means the policy shakes harder to push the same jitter through the
+                    filter. The penalty without smoothing leaves the physics able to
+                    accept impossible inputs in the first place. Together, it stands
+                    still.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>The milestone I'd been chasing, having a seizure.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>Raw per-tick activations going straight to the solver, and nothing in the reward objecting
+                            to a muscle slamming between slack and full every frame.</dd>
+                    </div>
+                    <div>
+                        <dt>Fix</dt>
+                        <dd>Muscle activation is smoothed before it reaches the solver, and the reward penalises rapid
+                            changes in muscle intensity.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>If the physics will accept something a real body can't do, the policy will find it and
+                            build its whole strategy on it. Constrain the simulation, then pay for the behaviour you
+                            want — one without the other just moves the problem.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
 
         <!-- METHOD -->
 
@@ -672,13 +785,18 @@
                 <strong>Why, what, and where it's at</strong>
                 <small>The maths-free version.</small>
             </a>
+            <a class="chapter" href="tools.html">
+                <span>02 · THE TOOLS</span>
+                <strong>Built for humans</strong>
+                <small>Painting muscles, watching training, and Play Run.</small>
+            </a>
             <a class="chapter" href="technical.html">
-                <span>02 · UNDER THE HOOD</span>
+                <span>03 · UNDER THE HOOD</span>
                 <strong>Solver, SIMD, PPO</strong>
                 <small>The actual numbers.</small>
             </a>
             <a class="chapter" href="bugs.html" aria-current="page">
-                <span>03 · BUG JOURNAL</span>
+                <span>04 · BUG JOURNAL</span>
                 <strong>It fell over again</strong>
                 <small>You are here.</small>
             </a>

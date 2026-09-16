@@ -685,7 +685,7 @@
     margin: 0 auto;
 
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
 
     border-bottom: 1px solid var(--line);
 }
@@ -1095,6 +1095,108 @@
 
 .bisect tr.is-culprit td:last-child {
     color: var(--accent);
+}
+
+/* ---- code snippets ----------------------------------------------------
+   Same language as the architecture nodes: hairline border, the page's
+   darkest ground, a mono label bar. Colour is rationed - cyan for keywords,
+   the bug-journal amber/pink for the bits you'd actually want to read. */
+
+.code-window {
+    margin: 55px 0;
+
+    border: 1px solid var(--line);
+
+    background: var(--bg);
+}
+
+/* on a light-ground section --bg would vanish into the page, so step up instead */
+.case-section:not(.dark-section) .code-window {
+    background: var(--surface);
+}
+
+.code-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 12px 18px;
+
+    border-bottom: 1px solid var(--line);
+
+    color: var(--muted);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.code-head span:first-child::before {
+    content: "■ ";
+
+    color: var(--accent);
+}
+
+.code-block {
+    margin: 0;
+    padding: 22px 18px 24px;
+
+    overflow-x: auto;
+
+    color: var(--text);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .78rem;
+    line-height: 1.75;
+    tab-size: 4;
+}
+
+/* undo the inline-code pill from style.css inside a block */
+.code-block code {
+    padding: 0;
+    border: 0;
+
+    background: none;
+    color: inherit;
+
+    font-size: inherit;
+}
+
+.tok-kw      { color: var(--accent); }
+.tok-type    { color: #b9c4cf; }
+.tok-fn      { color: var(--warn); }
+.tok-const   { color: var(--hot); }
+.tok-num     { color: var(--hot); }
+.tok-str     { color: var(--warn); }
+.tok-op      { color: var(--muted); }
+.tok-comment { color: var(--muted); font-style: italic; }
+
+.code-caption {
+    margin-top: -35px;
+
+    color: var(--muted);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem !important;
+}
+
+/* ---- tablet: four chapters don't fit in a row ------------------------ */
+
+@media (max-width: 1100px) {
+
+    .chapters {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .chapter:nth-child(odd) {
+        border-left: none;
+    }
+
+    .chapter:nth-child(n+3) {
+        border-top: 1px solid var(--line);
+    }
+
 }
 
 /* ---- mobile ---------------------------------------------------------- */
