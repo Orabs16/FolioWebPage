@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="../../CSS/case-study.css">
     <script src="../../JS/stickman.js" defer></script>
     <script src="../../JS/video-focus.js" defer></script>
+    <script src="../../JS/spec-popup.js" defer></script>
 </head>
 
 <body>
@@ -88,8 +89,9 @@
                     <li><a href="#solver"><span>01</span>Writing my own solver</a></li>
                     <li><a href="#batching"><span>02</span>Parallelising</a></li>
                     <li><a href="#constraints"><span>03</span>The global solve</a></li>
-                    <li><a href="#learning"><span>04</span>Letting it learn</a></li>
-                    <li><a href="#testing"><span>05</span>Proving it's not lying</a></li>
+                    <li><a href="#muscles"><span>04</span>What the muscles do</a></li>
+                    <li><a href="#learning"><span>05</span>Letting it learn</a></li>
+                    <li><a href="#testing"><span>06</span>Proving it's not lying</a></li>
                 </ul>
 
             </div>
@@ -156,6 +158,20 @@
                     then 3-DOF ball joints and 1-DOF yaw joints —
                     <strong>41 bodies, 68 degrees of freedom.</strong>
                 </p>
+
+                <p>
+                    Then I profiled it, and the part that sounds hard turned out to
+                    be the cheap part. With 64 creatures in flight, a step spends
+                    about <strong>57% of its time in contact, 30% in damping, and
+                    12% in the forward dynamics</strong> — the constraint solve
+                    costs roughly 4.6× what Featherstone does. Forward dynamics
+                    stays somewhere around a tenth of the frame at every batch size
+                    I measured, so it isn't an artefact of the batch size; it's just
+                    where the work is. That's 200 timed steps after 20 warmup ones,
+                    on
+                    <button type="button" class="spec-link" data-spec>my config</button>.
+                </p>
+
 
                 <div class="feature-grid">
 
@@ -254,7 +270,8 @@
                 <p>
                     The batch size that actually trains is 64 — not the biggest
                     number the solver can survive. I measured it: going to 256 buys
-                    about 21% more samples per second, but that's more than my laptop
+                    about 30% more samples per second, but that's more than
+                    <button type="button" class="spec-link" data-spec>my config</button>
                     can sustain reliably over time, and it costs four times the
                     iteration latency. Bigger looked better; in reality, it isn't.
                 </p>
@@ -365,7 +382,9 @@
                     old path's 16, because a dense sweep costs no tree traversals.
                     It also cut peak penetration by more than a third and held the
                     torso nearly half again as high. To be clear about the claim:
-                    that's the constraint solve, not an end-to-end framerate number.
+                    that's the constraint solve, not an end-to-end framerate number,
+                    measured on
+                    <button type="button" class="spec-link" data-spec>my config</button>.
                 </p>
 
                 <p>
@@ -380,12 +399,107 @@
 
 
 
-        <!-- LEARNING -->
+        <!-- MUSCLES -->
 
-        <section class="case-section dark-section" id="learning">
+        <section class="case-section dark-section" id="muscles">
 
             <div class="case-section-title">
-                <span>// 04 · letting it learn</span>
+                <span>// 04 · what the muscles do</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Two muscles per joint,
+                    not one number.
+                </h2>
+
+                <p>
+                    For a long time the policy's output was one signed torque per
+                    degree of freedom: positive pulls one way, negative the other,
+                    zero does nothing. It's the obvious encoding, and there is
+                    exactly one important sentence it cannot say —
+                    <em>stiffen this joint without moving it.</em> A real body does
+                    that constantly. Bracing is not the absence of force, it's two
+                    forces cancelling.
+                </p>
+
+                <p>
+                    So every DOF now has two channels, an extensor and a flexor, and
+                    the action space doubled to
+                    <strong>136 outputs for 68 degrees of freedom.</strong> Each
+                    muscle has its own authored strength curve, evaluated against
+                    the joint's current angle — muscles are weaker at the ends of
+                    their range, like the real thing.
+                </p>
+
+                <div class="feature-grid">
+
+                    <div>
+                        <span>01</span>
+                        <h3>Activation dynamics</h3>
+                        <p>
+                            Activation chases its command as a first-order lag: 30 ms
+                            to rise, 60 ms to relax. Muscle is quicker to fire than
+                            to let go, so a command that flips every frame arrives at
+                            the joint attenuated instead of whole.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>02</span>
+                        <h3>Antagonistic sum</h3>
+                        <p>
+                            The wanted torque is extensor minus flexor, each scaled
+                            by its own strength at the current angle. Two pulls,
+                            one joint, and the difference is what moves.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>03</span>
+                        <h3>Co-contraction damping</h3>
+                        <p>
+                            Whatever the two muscles have in common — min(extensor,
+                            flexor) — feeds the joint's damping. Fire both and the
+                            limb stiffens without moving. Fire one alone and nothing
+                            is added.
+                        </p>
+                    </div>
+
+                </div>
+
+                <p>
+                    My favourite part is how little the solver knows about any of
+                    this. It still takes exactly one signed torque per DOF, as it
+                    always did. The muscle layer computes the antagonistic sum, then
+                    divides it by whichever strength curve the result's sign is about
+                    to select — so the solver, applying its usual strength scaling,
+                    reproduces the exact number the muscles asked for. Antagonism is
+                    real everywhere above the solver and invisible inside it.
+                </p>
+
+                <p>
+                    That also fixed the twitching, and more honestly than a smoothing
+                    filter would have. The old bang-bang behaviour — the policy
+                    slamming a muscle between ±1 every frame — isn't rejected by a
+                    rule, it's just no longer worth doing, because the activation lag
+                    means a flipping command never fully arrives.
+                    <a href="bugs.html#bug-jitter">The jitter has its own bug entry.</a>
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- LEARNING -->
+
+        <section class="case-section" id="learning">
+
+            <div class="case-section-title">
+                <span>// 05 · letting it learn</span>
             </div>
 
             <div class="case-section-content">
@@ -414,13 +528,13 @@
 
                     <div>PHYSICAL STATE</div>
                     <span>→</span>
-                    <div>852 OBSERVATIONS</div>
+                    <div>991 OBSERVATIONS</div>
                     <span>→</span>
                     <div>TCP</div>
                     <span>→</span>
                     <div>PYTORCH PPO</div>
                     <span>→</span>
-                    <div>68 ACTIONS</div>
+                    <div>136 ACTIONS</div>
                     <span>→</span>
                     <div>MUSCLE TORQUES</div>
                     <span>→</span>
@@ -429,8 +543,41 @@
                 </div>
 
                 <p>
-                    Observations: torso orientation and velocity, height error,
-                    joint positions and velocities, contacts. The reward says reach
+                    What the policy sees grew a lot. It used to be 228 floats — a
+                    torso summary, joint angles and velocities, contacts. It's now
+                    <strong>991</strong>, assembled from blocks I can switch on and
+                    off independently: root state, full per-body state for all 41
+                    bodies (615 floats on its own), joint positions and velocities,
+                    the muscle activations, contacts, a small airborne block, and
+                    the objective. It used to infer the shape of its own body from
+                    joint angles. Now it's simply told — including the state of its
+                    own muscles, which closes the loop back to the previous section.
+                </p>
+
+                <p>
+                    Two details in there matter more than they look. Rotations go in
+                    as a 6D continuous representation rather than quaternions or
+                    Euler angles, because the tidy encodings have discontinuities a
+                    network has to spend capacity learning its way around. And the
+                    observation clamp — which squashes every channel into a fixed
+                    range — used to be 2.0, which the height and velocity channels
+                    hit constantly in the air: across its whole standing range, the
+                    creature read a flat 2.0. It was blind to how high it was, in
+                    the most literal sense. Raising the clamp to 10 and adding an
+                    explicit airborne block — ground clearance, time to impact, a
+                    flag — handed that information back.
+                    <a href="bugs.html#bug-clamp">That one has its own bug entry too.</a>
+                </p>
+
+                <p>
+                    The layout is also hashed into the handshake now, so a policy
+                    can't quietly be loaded against an environment that arranges its
+                    observations differently. That mistake produces a creature that
+                    looks broken rather than one that errors, which is the worst kind.
+                </p>
+
+                <p>
+                    The reward says reach
                     the target height, keep your limbs on the ground, hold a sensible
                     pose, and stop flailing — that last one is a torque penalty plus a
                     cost on rapid changes in muscle intensity. Without those, and
@@ -440,8 +587,8 @@
                 </p>
 
                 <div class="stat-strip">
-                    <div><strong>852</strong><span>Observations</span></div>
-                    <div><strong>68</strong><span>Actions</span></div>
+                    <div><strong>991</strong><span>Observations</span></div>
+                    <div><strong>136</strong><span>Actions</span></div>
                     <div><strong>60 Hz</strong><span>Control rate</span></div>
                     <div><strong>0</strong><span>RL frameworks</span></div>
                 </div>
@@ -453,6 +600,52 @@
                     meaningfully faster early — roughly 20–30% fewer samples to reach
                     the first survival milestones — and then the two converge once
                     the episode cap starts to bind.
+                </p>
+
+                <h3 class="subhead">How fast does it actually learn?</h3>
+
+                <p>
+                    The run behind the clip at the top of
+                    <a href="../../index.html">my front page</a> is 1346 iterations,
+                    and an iteration is <strong>8192 env-steps</strong> — a 128-tick
+                    horizon across all 64 creatures. That's 11,034,624 simulated
+                    steps, and about <strong>seven hours</strong> on
+                    <button type="button" class="spec-link" data-spec>my config</button>,
+                    spread across three sessions because I restarted it twice.
+                </p>
+
+
+                <p>
+                    The update's share grew as the run went on, which took me a
+                    moment to understand and then made complete sense: PPO stops
+                    early once an update has moved the policy too far, and late in
+                    the run each pass was moving it less — so six epochs fitted
+                    under the same KL budget where four had before. The policy
+                    wasn't static; it was still changing from iteration to
+                    iteration, just taking smaller steps inside each update. The
+                    better behaved the learning gets, the more of it you pay for.
+                </p>
+
+                <p>
+                    The genuinely annoying number is idle time. The two sides
+                    <em>strictly alternate</em>: collect the full 128 steps, then run
+                    the update, then collect again. Nothing is double-buffered. So
+                    Unreal spends <strong>37% of the run doing nothing</strong>,
+                    waiting for Python to finish. That isn't an estimate either; the
+                    server counts its own waiting. It could sustain 8.5 steps per
+                    second and delivers 5.4. Overlapping collection with the update
+                    would get most of that third back, and I haven't done it yet.
+                </p>
+
+                <p>
+                    One honest note on the numbers above and the ones further up this
+                    page: the solver costs meaningfully more per step during training
+                    than it does in the benchmark. They're not the same measurement.
+                    The benchmark runs a deliberately clean configuration — no drag,
+                    no friction, random torque babble — while training runs the real
+                    physical setup with a policy that spends its time in exactly the
+                    contact-heavy states a constraint solver finds expensive. Same code
+                    path, different worlds.
                 </p>
 
                 <p>
@@ -468,10 +661,10 @@
 
         <!-- TESTING -->
 
-        <section class="case-section" id="testing">
+        <section class="case-section dark-section" id="testing">
 
             <div class="case-section-title">
-                <span>// 05 · proving it is not lying to me</span>
+                <span>// 06 · proving it is not lying to me</span>
             </div>
 
             <div class="case-section-content">
@@ -556,7 +749,7 @@
 
         <!-- NEXT -->
 
-        <section class="case-next dark-section">
+        <section class="case-next">
 
             <p class="eyebrow">// next</p>
 

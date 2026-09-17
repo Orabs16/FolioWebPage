@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="../../CSS/case-study.css">
     <script src="../../JS/stickman.js" defer></script>
     <script src="../../JS/video-focus.js" defer></script>
+    <script src="../../JS/spec-popup.js" defer></script>
 </head>
 
 <body>
@@ -153,6 +154,8 @@
                             episode</span><span class="bug-tag fixed">Fixed</span></a>
                     <a href="#bug-jitter"><span class="num">07</span><span class="title">It stood up, and
                             shook</span><span class="bug-tag fixed">Fixed</span></a>
+                    <a href="#bug-clamp"><span class="num">08</span><span class="title">Blind to its own
+                            height</span><span class="bug-tag fixed">Fixed</span></a>
                 </div>
 
             </div>
@@ -705,6 +708,91 @@
                         <dd>If the physics will accept something a real body can't do, the policy will find it and
                             build its whole strategy on it. Constrain the simulation, then pay for the behaviour you
                             want — one without the other just moves the problem.</dd>
+                    </div>
+                </dl>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- 08 CLAMP -->
+
+        <section class="case-section" id="bug-clamp">
+
+            <div class="case-section-title">
+                <span>// entry 08</span>
+                <span class="bug-tag fixed">Fixed</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    It could not see
+                    how high it was.
+                </h2>
+
+                <p>
+                    Observations get clamped on their way to the policy — standard
+                    practice, and for good reason: one channel spiking to 400 while
+                    everything else sits near 1 makes for miserable training. Mine
+                    clamped every channel to a magnitude of 2.0, which I set early,
+                    when the creature's whole world was a crumpled heap near the floor.
+                </p>
+
+                <p>
+                    Then it learned to stand, and the number stopped moving. Height
+                    error, torso velocity — anything with real magnitude behind it
+                    pinned itself at 2.0 and stayed there. Across the entire standing
+                    range, from half-crouched to fully upright, the policy read the
+                    same constant. It was not being given bad information about its
+                    height. It was being given <em>no</em> information about its
+                    height, in a shape that looks exactly like information.
+                </p>
+
+                <p>
+                    Nothing errors when this happens. There is no NaN, no warning, no
+                    diverging loss. The tensor is the right size, every value is
+                    finite and in range, and training runs happily for hours producing
+                    a policy that is guessing. It took noticing that the creature
+                    behaved identically at two visibly different heights — which is
+                    not a physics symptom, it's a <em>perception</em> symptom — to
+                    look at the clamp at all.
+                </p>
+
+                <p>
+                    Raising the clamp to 10.0 fixed the saturation. The more useful
+                    half of the fix was adding an explicit airborne block — ground
+                    clearance, ballistic time to impact, and a plain airborne flag —
+                    so that "how far off the ground am I, and how long until that
+                    changes" is something the policy is told directly instead of
+                    something it has to reconstruct from a channel that was already
+                    flattened.
+                </p>
+
+                <dl class="bug-meta">
+                    <div>
+                        <dt>Looked like</dt>
+                        <dd>A policy that plateaued for no visible reason, behaving the same at heights that were
+                            obviously different.</dd>
+                    </div>
+                    <div>
+                        <dt>Actually was</dt>
+                        <dd>The observation clamp, set to 2.0 back when nothing ever got near it, quietly saturating
+                            the height and velocity channels across the whole useful range.</dd>
+                    </div>
+                    <div>
+                        <dt>Fix</dt>
+                        <dd>Clamp raised to 10.0, and a dedicated airborne block added to the observation space so
+                            ground clearance and time-to-impact are stated outright.</dd>
+                    </div>
+                    <div>
+                        <dt>Lesson</dt>
+                        <dd>A clamp is lossy compression of everything your policy knows, and it fails silently — a
+                            saturated channel is indistinguishable from a constant one. Every limit I set early was
+                            set against a creature that could barely move, and none of them re-checked themselves
+                            when it got good.</dd>
                     </div>
                 </dl>
 

@@ -711,3 +711,188 @@ code {
   flex-wrap: wrap;
   gap: 14px 32px;
 }
+
+/* =========================================================
+   "MY CONFIG" PANEL
+   An inline trigger next to a performance claim, and the one
+   small window it opens. Markup is built by JS/spec-popup.js.
+   ========================================================= */
+
+.spec-link {
+  padding: 0;
+  margin: 0;
+
+  border: none;
+  background: none;
+  color: var(--accent);
+
+  font: inherit;
+  cursor: pointer;
+
+  /* a button is vertical-align: middle by default, which lifts it off the
+     baseline of the sentence it sits in */
+  vertical-align: baseline;
+
+  /* underline sits low enough to read as a link, not as an input */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(85, 214, 255, .45);
+}
+
+.spec-link:hover,
+.spec-link:focus-visible {
+  text-decoration-color: var(--accent);
+}
+
+.spec-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(5, 7, 9, .78);
+
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.spec-overlay.is-open {
+  opacity: 1;
+}
+
+.spec-overlay[hidden] {
+  display: none;
+}
+
+.spec-panel {
+  position: relative;
+
+  width: min(100%, 460px);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+
+  padding: 34px 32px 30px;
+
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+
+  transform: translateY(8px);
+  transition: transform .18s ease;
+}
+
+.spec-overlay.is-open .spec-panel {
+  transform: none;
+}
+
+.spec-eyebrow {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .62rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.spec-title {
+  margin: 10px 0 24px;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.9rem;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+
+.spec-list {
+  margin: 0;
+
+  border-top: 1px solid var(--line);
+}
+
+.spec-list > div {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 14px;
+  align-items: baseline;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid var(--line);
+}
+
+.spec-list dt {
+  color: var(--muted);
+
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .62rem;
+  letter-spacing: .12em;
+}
+
+.spec-list dd {
+  margin: 0;
+}
+
+.spec-list dd strong {
+  display: block;
+
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+.spec-list dd span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .72rem;
+}
+
+.spec-note {
+  margin: 20px 0 0;
+
+  color: var(--muted);
+
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.spec-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  background: none;
+  color: var(--muted);
+
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.spec-close:hover,
+.spec-close:focus-visible {
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+
+  .spec-panel {
+    padding: 30px 22px 26px;
+  }
+
+}

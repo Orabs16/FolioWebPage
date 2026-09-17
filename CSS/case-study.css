@@ -368,6 +368,20 @@
     font-size: .65rem;
 }
 
+/* a section that runs long enough to need a second beat inside it - there is
+   no generic h3 on these pages, so this is the one that gets styled */
+.case-section-content .subhead {
+    max-width: 650px;
+
+    margin: 70px 0 -10px;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.035em;
+}
+
 .feature-grid h3 {
     margin: 25px 0 10px;
 
@@ -385,21 +399,25 @@
    LEARNING FLOW
    ========================================================= */
 
+/* Seven boxes and six arrows. This used to be one non-wrapping row with
+   overflow-x: auto, which overflowed by a hair at every width and put a
+   scrollbar under the diagram - a scrollbar being, for a pipeline you are
+   meant to read at a glance, the worst possible affordance. It wraps now,
+   and goes vertical on narrow screens where a row can't work at all. */
+
 .learning-flow {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 14px;
+    gap: 10px 12px;
 
     margin: 70px 0;
-
-    overflow-x: auto;
-    padding-bottom: 15px;
 }
 
 .learning-flow div {
     flex-shrink: 0;
 
-    padding: 15px 18px;
+    padding: 14px 16px;
 
     border: 1px solid var(--line);
 
@@ -410,6 +428,10 @@
 
 .learning-flow span {
     color: var(--accent);
+
+    /* an arrow is a joint, not a step - it should never be the widest thing
+       on a wrapped line, nor start one on its own */
+    line-height: 1;
 }
 
 
@@ -1238,6 +1260,24 @@
     .media-block.is-slot {
         aspect-ratio: auto;
         min-height: 300px;
+    }
+
+    /* a seven-box row has no chance at phone width, so the pipeline turns and
+       reads downward instead - same order, rotated arrows, no scrolling */
+    .learning-flow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .learning-flow div {
+        text-align: center;
+    }
+
+    .learning-flow span {
+        align-self: center;
+
+        transform: rotate(90deg);
     }
 
     .bug-index a {
