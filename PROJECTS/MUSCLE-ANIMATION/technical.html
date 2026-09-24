@@ -91,7 +91,8 @@
                     <li><a href="#constraints"><span>03</span>The global solve</a></li>
                     <li><a href="#muscles"><span>04</span>What the muscles do</a></li>
                     <li><a href="#learning"><span>05</span>Letting it learn</a></li>
-                    <li><a href="#testing"><span>06</span>Proving it's not lying</a></li>
+                    <li><a href="#perturbations"><span>06</span>Making it hittable</a></li>
+                    <li><a href="#testing"><span>07</span>Proving it's not lying</a></li>
                 </ul>
 
             </div>
@@ -659,12 +660,117 @@
 
 
 
-        <!-- TESTING -->
+        <!-- PERTURBATIONS -->
 
-        <section class="case-section dark-section" id="testing">
+        <section class="case-section dark-section" id="perturbations">
 
             <div class="case-section-title">
-                <span>// 06 · proving it is not lying to me</span>
+                <span>// 06 · making it hittable</span>
+            </div>
+
+            <div class="case-section-content">
+
+                <h2>
+                    Nothing ever pushed back.
+                    Now something does.
+                </h2>
+
+                <p>
+                    Until now, every force on Muto came from Muto itself: gravity,
+                    muscles, ground contact, joint limits. Nothing ever pushed back,
+                    so the policy could learn a stance that only stayed up because
+                    nobody touched it. Time to fix that.
+                </p>
+
+                <div class="video-frame">
+                    <div class="media-block">
+                        <video autoplay muted loop playsinline preload="metadata">
+                                <source src="../../ASSET/VIDEO/Impact.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                        </video>
+                        <span class="media-caption">
+                            SHOVES · SHOTS · ONE DELIVERY PATH
+                        </span>
+                    </div>
+
+                    <svg class="stickman pose-push"></svg>
+                </div>
+
+                <div class="feature-grid">
+
+                    <div>
+                        <span>TRAINING</span>
+                        <h3>Random pushes</h3>
+                        <p>
+                            Each environment gets shoved on its own random timer.
+                            The push strength scales with bodyweight, so it survives
+                            mass changes. The direction is roughly horizontal, and
+                            the push lands on the pelvis or a random limb, spread
+                            over 80 ms instead of one substep.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>GAMEPLAY</span>
+                        <h3>You can shoot it</h3>
+                        <p>
+                            Kinematic collision proxies built from the solver's own
+                            capsules, re-posed every frame. What you can hit is
+                            exactly what the creature collides with.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>F·T</span>
+                        <h3>One path, tested</h3>
+                        <p>
+                            Every push, random or not, goes through the same function
+                            inside the substep loop, and a test checks the momentum
+                            it adds.
+                        </p>
+                    </div>
+
+                </div>
+
+                <p>
+                    The policy is never told a push is coming. It has to feel it in
+                    its own body state, because a creature that only stays up when
+                    warned isn't really balancing.
+                </p>
+
+                <p>
+                    The gameplay side had a catch: Muto's bodies are rows in my
+                    batched solver, not Chaos bodies, so Unreal physics couldn't
+                    touch them at all. Hence the proxies. Hits arrive two ways,
+                    Chaos contacts (projectiles, physics props) and Blueprint calls
+                    (<code>ApplyWorldImpulse</code>, <code>ApplyRadialImpulse</code>)
+                    for hitscan, explosions and melee, and both feed one queue.
+                    Units stay in Unreal's kg·cm/s, with a scale factor because Muto
+                    weighs several tonnes, not 80 kg.
+                </p>
+
+                <p>
+                    Random pushes, gameplay hits and manual shoves all go through
+                    that one delivery function, which carries each impulse through
+                    the articulated tree. An automated test launches the real rig in
+                    zero gravity and checks that a force F over time T changes its
+                    momentum by exactly F·T, at any substep size. That catches the
+                    bugs you'd never see in the viewport, like a push three times
+                    too strong that still looks like a believable big shove.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- TESTING -->
+
+        <section class="case-section" id="testing">
+
+            <div class="case-section-title">
+                <span>// 07 · proving it is not lying to me</span>
             </div>
 
             <div class="case-section-content">
