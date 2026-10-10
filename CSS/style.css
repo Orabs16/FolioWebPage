@@ -465,7 +465,6 @@ footer {
 }
 
 .about-grid > div:first-child > p:last-child {
-  color: var(--muted);
   max-width: 600px;
 }
 
@@ -632,34 +631,6 @@ footer h2 {
 
 .reel-media .media-label {
   color: var(--accent);
-}
-
-.reel-sound {
-  position: absolute;
-  z-index: 1;
-  left: 0;
-  bottom: 0;
-  margin: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  background: rgba(10, 13, 16, .72);
-  backdrop-filter: blur(3px);
-  color: var(--muted);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: .68rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color .2s ease, border-color .2s ease;
-}
-
-.reel-sound:hover,
-.reel-sound[aria-pressed="true"] {
-  color: var(--accent);
-  border-color: var(--accent);
 }
 
 /* inline code in body copy - ulong, NaN, that kind of thing */

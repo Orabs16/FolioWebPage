@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Look-at while running — an Unreal Engine Control Rig layer that lets a character turn its attention to things without breaking its walk or run cycle.">
+    <title>Look-at While Running — Corentin Watthez</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../CSS/style.css">
+    <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
+    <script src="../../JS/spec-popup.js" defer></script>
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="logo" href="../../index.html">CW<span>.</span></a>
+        <nav><a href="../../index.html#work">Work</a><a href="../../index.html#about">About</a><a
+                href="../../index.html#cv">CV</a><a href="../../index.html#contact">Contact</a></nav>
+    </header>
+    <main>
+        <section class="case-hero">
+            <div class="case-hero-copy">
+                <p class="eyebrow">ATTENTION / LOOK-AT · UNREAL ENGINE</p>
+                <h1>Running past things<br><span>and actually noticing them.</span></h1>
+                <p class="case-intro">A run cycle stares straight ahead, always. Throw a ball past the character
+                    and it carries on like nothing happened. So I made a Control Rig layer that sits on top of
+                    the walk/run and turns the whole upper body toward whatever deserves attention, without
+                    affecting the bottom animation.</p>
+                <div class="case-meta">
+                    <div><span>ENGINE</span><strong>Unreal Engine</strong></div>
+                    <div><span>BUILT WITH</span><strong>Control Rig · Anim Blueprint · Sequencer</strong></div>
+                    <div><span>FOCUS</span><strong>Procedural layering · Tooling</strong></div>
+                </div>
+            </div>
+            <div class="media-label">SAME TAKE · CONTROL RIG OFF, THEN ON</div>
+            <div class="video-frame">
+                <video autoplay muted loop playsinline>
+                    <source src="../../ASSET/VIDEO/LookAtOnOff.mp4" type="video/mp4">Your browser does not support
+                    the video tag.
+                </video>
+                <svg class="stickman pose-sit"></svg>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>// 01 · one take, one knob</span></div>
+            <div class="case-section-content">
+                <h2>Each clip on this page follows a level sequence.</h2>
+                <p>A mentor told me during my internship: if you want to show what a parameter does, make the test
+                    reproducible and change <em>one</em> thing. So every comparison here comes from a single Level
+                    Sequence. Same run, same red ball, same frames. Each clip is two renders of it with one
+                    value changed, side by side.</p>
+                <p>That's also why the system is driven from Sequencer at the moment. Not because it needs
+                    Sequencer, but because "it looked better that one time" isn't evidence.</p>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>// 02 · how it fits together</span></div>
+            <div class="case-section-content">
+                <h2>An event goes in, a head turns.</h2>
+                <div class="architecture">
+                    <div class="architecture-node"><span>01</span><strong>Level Sequence</strong><small>Fires events on
+                            exact frames</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>02</span><strong>Attention BP</strong><small>Holds the target
+                            + settings</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>03</span><strong>Anim Blueprint</strong><small>Receives the
+                            attention events</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>04</span><strong>Walk / Run</strong><small>Locomotion as
+                            usual</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>05</span><strong>Control Rig</strong><small>Turns the body on
+                            top of it</small></div>
+                </div>
+                <p class="architecture-note">The Control Rig runs <em>after</em> the locomotion pass, so the walk
+                    and run animations stay untouched. The rig only adds the look on top of the pose it receives.</p>
+                <p>The Anim Blueprint has two events and that's the whole interface:</p>
+                <div class="feature-grid">
+                    <div><span>EVENT</span>
+                        <h3>AttentionChange</h3>
+                        <p>Takes the object to look at and a settings struct: blend time, blend curve and
+                            weight. The latest call wins: a new target just takes over.</p>
+                    </div>
+                    <div><span>EVENT</span>
+                        <h3>AttentionFade</h3>
+                        <p>Takes a time and a curve, and blends the character back to looking where its
+                            animation wants it to look.</p>
+                    </div>
+                    <div><span>TOOL</span>
+                        <h3>The Attention BP</h3>
+                        <p>What a designer touches: a Blueprint holding the same struct, so tuning a look is
+                            editing three fields, not opening the rig.</p>
+                    </div>
+                </div>
+                <p>Sequencer is only the thing calling the events today. Anything that can reach the Anim
+                    Blueprint can call them too, like an AI perception callback or a trigger volume. I just haven't
+                    wired one up yet.</p>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>// 03 · looking behind</span></div>
+            <div class="case-section-content">
+                <h2>Looking back without breaking his neck.</h2>
+                <p>When the target crosses directly behind the character, the angle goes from -180° to
+                    180° in a single frame. For the maths that's basically the same direction. For the spine,
+                    it means going from twisted all the way one way to twisted all the way the other, with
+                    nothing in between: one frame he's looking over one shoulder, the next he's looking over
+                    the other, with a little motion blur as a souvenir.</p>
+                <p>Two problems were hiding in that snap, so there are two pieces to the fix.</p>
+                <div class="feature-grid">
+                    <div><span>MATHS</span>
+                        <h3>A custom quaternion slerp</h3>
+                        <p>A regular slerp always takes the shortest way round, which is exactly the thing
+                            that flips sides at 180°. Mine keeps going in the direction it was already
+                            turning, so the rotation stays continuous past 180° instead of jumping to the
+                            other side.</p>
+                    </div>
+                    <div><span>MOTION</span>
+                        <h3>The U-turn</h3>
+                        <p>When the target goes past a threshold behind the character, the point he's
+                            looking at doesn't cut straight through his back. It swings around him on a
+                            helix-shaped path, so the head follows a curve a human would actually take.</p>
+                    </div>
+                </div>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/LookAtHeadUTurn.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">LEFT: THE OLD SNAP · RIGHT: SLERP + U-TURN</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>// 04 · head only vs. the whole spine</span></div>
+            <div class="case-section-content">
+                <h2>Turning just the head is how you get an owl.</h2>
+                <p>The obvious version rotates the head bone and calls it a day. It works, technically. It also
+                    looks like the neck is on a swivel while the rest of the body hasn't been told anything.</p>
+                <p>So the rotation is spread over every bone from the head down to the pelvis, each with its
+                    own weight. Same target, same angle, but now the whole person is looking, not just their
+                    face.</p>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/LookAtHeadOnly.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">LEFT: HEAD → PELVIS, WEIGHTED · RIGHT: HEAD BONE ONLY</span>
+                </div>
+                <p>And once the weights exist, they become another acting knob. Same run, same ball, two
+                    setups. On the left the pelvis doesn't take part at all and the turn piles up near the
+                    top. On the right the pelvis, spine and shoulders all get a real share, so the
+                    whole torso commits to the look.</p>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/LookAtWeights.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">PELVIS 0 · SPINE 0.1 · SHOULDER 0.3 · HEAD 1 VS. 0.3 · 0.5 · 0.8 · 1</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>// 05 · timing is personality</span></div>
+            <div class="case-section-content">
+                <h2>Same target, a different character.</h2>
+                <p>The blend time in the struct ends up doing a lot of acting. At one second the character
+                    <em>drifts</em> toward the ball, a bit absent-minded. At a tenth of a second it whips around
+                    like it just heard its name. Neither is wrong; they're two different people.</p>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/LookAtBlendTime.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">SAME EVENT · 1 S BLEND VS. 0.1 S BLEND</span>
+                </div>
+                <p>Then there's the curve. Same duration, different shape: ease in starts lazy and catches up,
+                    ease out reacts immediately and settles. It's a subtler difference, which is exactly why
+                    the struct takes a curve and not just a number. Animators care about the subtle one.</p>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/LookAtEase.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">SAME DURATION · EASE IN VS. EASE OUT</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>// 06 · the part I'm proudest of</span></div>
+            <div class="case-section-content">
+                <h2>The body bounces. The gaze doesn't.</h2>
+                <p>A run cycle bobs and twists every step. If the look-at doesn't account for that, the head
+                    lands on the target and then wobbles around it in rhythm with the feet, which reads as
+                    "not actually looking".</p>
+                <p>Here the red debug line goes from the head to the target. Watch it while the character
+                    runs: the body moves underneath, the line stays pinned.</p>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/LookAtStability.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">DEBUG LINE: HEAD → TARGET · OFF, THEN ON</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>// 07 · what works today</span></div>
+            <div class="case-section-content">
+                <h2>Honest status.</h2>
+                <div class="status-grid">
+                    <div class="status complete"><span>✓</span><strong>Head → pelvis weighted look</strong><small>Working</small></div>
+                    <div class="status complete"><span>✓</span><strong>Blend time + curve + weight</strong><small>Working</small></div>
+                    <div class="status complete"><span>✓</span><strong>Stable gaze while running</strong><small>Working</small></div>
+                    <div class="status complete"><span>✓</span><strong>AttentionChange / AttentionFade</strong><small>Working · latest wins</small></div>
+                    <div class="status complete"><span>✓</span><strong>Targets behind the character</strong><small>Custom slerp + helix U-turn, no more snap</small></div>
+                    <div class="status"><span>✗</span><strong>Eyes</strong><small>Fixed for now, it's a head turn</small></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-next">
+            <p class="eyebrow">// 08 · next</p>
+            <h2>Next: eyes that lead<br>the head.</h2>
+            <p>Then something in the world that calls
+                <code>AttentionChange</code> on its own, so it stops needing me holding the Sequencer.</p>
+            <a class="button" href="../../index.html#work">Back to work <span>↗</span></a>
+        </section>
+    </main>
+    <footer id="contact">
+        <div>
+            <p class="eyebrow">// SAY HI</p>
+            <h2>Corentin Watthez</h2>
+        </div>
+        <div class="footer-links"><a href="https://github.com/Orabs16">GitHub ↗</a><a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a><a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a><a
+                href="mailto:corentinwatthez@gmail.com">Email ↗</a></div>
+        <p class="copyright">© 2026 Corentin Watthez</p>
+    </footer>
+</body>
+
+</html>
