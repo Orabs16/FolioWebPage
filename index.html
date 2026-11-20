@@ -44,13 +44,15 @@
         <div class="reel-media">
           <div class="media-label">// THE SHOWREEL</div>
 
-          <video autoplay muted loop playsinline preload="metadata"
-            aria-label="Showreel — procedural animation, physics solvers and rigging tools">
-            <source src="ASSET/VIDEO/ShowrealV5.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+          <!-- loop=1 only loops a single video when playlist= repeats its own id -->
+          <iframe
+            src="https://www.youtube.com/embed/6QkKyatcmZc?si=ELUZIff4RCXdo5Nv&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=6QkKyatcmZc&amp;playsinline=1&amp;rel=0"
+            title="Showreel — procedural animation, physics solvers and rigging tools"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen></iframe>
 
-          <div class="media-corner">REEL V5 · 2026</div>
+          <div class="media-corner">REEL V6 · 2026</div>
         </div>
         <svg class="stickman pose-sit"></svg>
       </div>
@@ -68,10 +70,9 @@
       <article class="project-row">
         <div class="video-frame">
           <div class="project-media">
-            <div class="media-label">THE CHARACTERS LOOK AT THE TARGET</div>
-
+            <div class="media-label">THE BLADE FINDS THE TARGET</div>
             <video autoplay muted loop playsinline>
-              <source src="ASSET/VIDEO/LookAtOnOff.mp4" type="video/mp4">
+              <source src="ASSET/VIDEO/ThrustDemo.mp4" type="video/mp4">
               Your browser does not support the video tag.
             </video>
 
@@ -80,20 +81,18 @@
           <svg class="stickman pose-hang"></svg>
         </div>
         <div class="project-info">
-          <p class="project-index">SMALL TOOL / FRESH</p>
-          <h3>Looking at things<br>while running</h3>
+          <p class="project-index">FRESH / UE 5.8</p>
+          <h3>Stabbing things<br>wherever they are</h3>
           <p>
-            Run cycles stare straight ahead, always. This Control Rig layer sits on top of the
-            walk/run and turns everything from head to pelvis toward whatever deserves attention,
-            without the legs ever finding out.
+            An attack animation stabs where the animator aimed it, not where the enemy happens to be
+            standing. 
           </p>
           <p>
-            Every clip is the same sequence rendered twice with one value changed. It used to
-            teleport from one shoulder to the other when the target crossed behind him. Now a
-            custom slerp and a little helix-shaped U-turn handle that.
+            So I made a system that allows the characters to hit any coordinate in front of him and the animator just
+            has to make 5 animation for it to work.
           </p>
-          <div class="tags"><span>Unreal Engine</span><span>Control Rig</span><span>Anim Blueprint</span><span>Sequencer</span></div>
-          <a class="text-link" href="PROJECTS/LOOK-AT/index.html">See the comparisons <span>↗</span></a>
+          <div class="tags"><span>Unreal Engine</span><span>Control Rig</span><span>C++</span><span>Blend Space</span><span>Anim Modifiers</span></div>
+          <a class="text-link" href="PROJECTS/MOTION-WARPING/index.html">How it aims <span>↗</span></a>
         </div>
       </article>
 
@@ -135,6 +134,38 @@
             <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/technical.html">behind the scenes <span>↗</span></a>
             <a class="text-link" href="PROJECTS/MUSCLE-ANIMATION/tools.html">or artist friendly <span>↗</span></a>
           </div>
+        </div>
+      </article>
+
+      <article class="project-row">
+        <div class="video-frame">
+          <div class="project-media">
+            <div class="media-label">THE CHARACTERS LOOK AT THE TARGET</div>
+
+            <video autoplay muted loop playsinline>
+              <source src="ASSET/VIDEO/LookAtOnOff.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+
+            <div class="media-corner">UNREAL ENGINE · CONTROL RIG</div>
+          </div>
+          <svg class="stickman pose-sit"></svg>
+        </div>
+        <div class="project-info">
+          <p class="project-index">SMALL TOOL</p>
+          <h3>Looking at things<br>while running</h3>
+          <p>
+            Run cycles stare straight ahead, always. This Control Rig layer sits on top of the
+            walk/run and turns everything from head to pelvis toward whatever deserves attention,
+            without the legs ever finding out.
+          </p>
+          <p>
+            Every clip is the same sequence rendered twice with one value changed. It used to
+            teleport from one shoulder to the other when the target crossed behind him. Now a
+            custom slerp and a little helix-shaped U-turn handle that.
+          </p>
+          <div class="tags"><span>Unreal Engine</span><span>Control Rig</span><span>Anim Blueprint</span><span>Sequencer</span></div>
+          <a class="text-link" href="PROJECTS/LOOK-AT/index.html">See the comparisons <span>↗</span></a>
         </div>
       </article>
 

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Motion warping a thrust attack in Unreal Engine 5.8 — a blend space of five stabs, a custom Control Rig node that aims the blade at the target, and baked foot-lock curves.">
+    <title>Motion Warping a Thrust — Corentin Watthez</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../CSS/style.css">
+    <link rel="stylesheet" href="../../CSS/case-study.css">
+    <script src="../../JS/stickman.js" defer></script>
+    <script src="../../JS/spec-popup.js" defer></script>
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="logo" href="../../index.html">CW<span>.</span></a>
+        <nav><a href="../../index.html#work">Work</a><a href="../../index.html#about">About</a><a
+                href="../../index.html#cv">CV</a><a href="../../index.html#contact">Contact</a></nav>
+    </header>
+    <main>
+        <section class="case-hero">
+            <div class="case-hero-copy">
+                <p class="eyebrow">MOTION WARPING / THRUST · UNREAL ENGINE 5.8</p>
+                <h1>Five stabs<br><span>and one target anywhere.</span></h1>
+                <div class="case-meta">
+                    <div><span>ENGINE</span><strong>Unreal Engine 5.8</strong></div>
+                    <div><span>BUILT WITH</span><strong>Blend Space · Control Rig · C++ · Anim Modifiers</strong></div>
+                    <div><span>FOCUS</span><strong>Motion warping · Editor tooling</strong></div>
+                </div>
+            </div>
+            <div class="media-label">THE FULL THRUST, AIMED AT THE TARGET</div>
+            <div class="video-frame">
+                <video autoplay muted loop playsinline>
+                    <source src="../../ASSET/VIDEO/ThrustDemo.mp4" type="video/mp4">Your browser does not support
+                    the video tag.
+                </video>
+                <svg class="stickman pose-sit"></svg>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>// 01 · how it fits together</span></div>
+            <div class="case-section-content">
+                <h2>Five stabs go in, one stab comes out.</h2>
+                <div class="architecture">
+                    <div class="architecture-node"><span>01</span><strong>Anim Modifiers</strong><small>Bake the hand
+                            path and the foot curves</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>02</span><strong>Thrust Data Table</strong><small>Turns those
+                            paths into blend coordinates</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>03</span><strong>Blend Space</strong><small>Mixes the five
+                            stabs toward the target</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>04</span><strong>Control Rig: hand</strong><small>Aims the
+                            blade socket at the target</small></div>
+                    <div class="architecture-arrow">→</div>
+                    <div class="architecture-node"><span>05</span><strong>Control Rig: feet</strong><small>Keeps
+                            planted feet planted</small></div>
+                </div>
+                <p class="architecture-note">The first two steps happen in the editor, once per clip. By the time
+                    the game runs, the hard geometry is already baked into the animations and the table.</p>
+                <p>The blend space does the big move: it gets the whole body stabbing in roughly the right
+                    direction, with real animation doing the work instead of a stretched-out arm. Then the two
+                    Control Rig passes clean up what a blend can never get exactly right.</p>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>// 02 · five thrusts, one target</span></div>
+            <div class="case-section-content">
+                <h2>Teaching a blend space where a stab goes.</h2>
+                <p>There are five thrusts: up left, up right, middle, low left and low right. A blend space wants
+                    a coordinate for each one, and typing "this one is, like, kind of up-left" by hand is just
+                    guessing with extra steps.</p>
+                <p>So an animation modifier walks the hand bone through each clip. It takes the <em>summit</em>,
+                    the point of the path farthest from where it started, and fits a least-squares line through
+                    every sample of the path, pointing toward the summit. One clip, one thrust line.</p>
+                <div class="feature-grid">
+                    <div><span>MATHS</span>
+                        <h3>Where all the stabs meet</h3>
+                        <p>Five lines in 3D never cross perfectly, so I look for the point with the smallest
+                            total squared distance to all of them. It comes out as a small 3×3 system, and
+                            that point is where the stabs converge.</p>
+                    </div>
+                    <div><span>MATHS</span>
+                        <h3>A coordinate from a cross product</h3>
+                        <p>For each clip, I cross the direction from the average position to the convergence
+                            point with the direction from that clip to the convergence point. The Z and X of the
+                            result become its spot in the blend space.</p>
+                    </div>
+                    <div><span>TOOL</span>
+                        <h3>A table that keeps itself up to date</h3>
+                        <p>A custom Thrust Data Table asset, right in the Content Browser. Add a row or change a
+                            clip and every coordinate is recomputed on its own, so nobody has to remember to.</p>
+                    </div>
+                </div>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/ThrustBlendSpace.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">DEBUG LINES: THE FIVE THRUSTS AND THE TARGET</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section">
+            <div class="case-section-title"><span>// 03 · aim bone socket</span></div>
+            <div class="case-section-content">
+                <h2>The bone may rotate. The socket may not.</h2>
+                <p>A blend gets close, never exact. The blade hangs off a socket on the right hand, and that
+                    socket has its own position <em>and</em> rotation offset. I need the socket's X axis to go
+                    straight through the target, but the only thing allowed to move is the hand bone.</p>
+                <p>Pointing the bone at the target doesn't cut it: the offset carries the blade right past.
+                    So I wrote a custom C++ Control Rig node, <code>Aim Bone Socket</code>, that rotates the bone
+                    so the socket ends up aimed.</p>
+                <div class="feature-grid">
+                    <div><span>MATHS</span>
+                        <h3>Find the right point on the blade</h3>
+                        <p>It solves for the point on the socket's axis that sits exactly as far from the bone as
+                            the target does (the larger root of a quadratic), then applies the shortest rotation
+                            from that point to the target. The twist stays untouched.</p>
+                    </div>
+                    <div><span>SAFETY</span>
+                        <h3>It knows when it can't</h3>
+                        <p>If the target is closer to the bone than the blade's axis ever gets, there's no
+                            answer, and the node says so with a <code>bReachable</code> flag instead of making
+                            one up. There's also a weight, blended with a slerp.</p>
+                    </div>
+                    <div><span>TESTED</span>
+                        <h3>0.0000024°</h3>
+                        <p>I checked the maths on its own against 5,000 random bones, sockets and targets.
+                            That's the worst miss. I'll take it.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="case-section dark-section">
+            <div class="case-section-title"><span>// 04 · foot lock</span></div>
+            <div class="case-section-content">
+                <h2>Lunging is easier when your feet stay put.</h2>
+                <p>Blend five thrusts together and you also blend five sets of feet. Each clip plants them in a
+                    slightly different spot, so the mix slides around like the floor got waxed.</p>
+                <p>So another animation modifier looks at the heel and the toe of each foot, frame by frame, and
+                    measures how fast they move in world space, root motion included. Slow enough means planted,
+                    fast enough means free, with a smooth ramp in between and some smoothing to kill the noise.
+                    That gets baked into each clip as a curve.</p>
+                <p>At runtime the Control Rig reads those curves: they say whether a foot is allowed to move and
+                    how fast, and a TwoBoneIK keeps it where it should be.</p>
+                <div class="media-block">
+                    <video autoplay muted loop playsinline>
+                        <source src="../../ASSET/VIDEO/ThrustFootLock.mp4" type="video/mp4">Your browser does not
+                        support the video tag.
+                    </video>
+                    <span class="media-caption">FOOT LOCK OFF VS. ON</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <footer id="contact">
+        <div>
+            <p class="eyebrow">// SAY HI</p>
+            <h2>Corentin Watthez</h2>
+        </div>
+        <div class="footer-links"><a href="https://github.com/Orabs16">GitHub ↗</a><a href="https://www.linkedin.com/in/corentin-watthez-62b219331/">LinkedIn ↗</a><a href="https://www.artstation.com/corentinwatthez">ArtStation ↗</a><a
+                href="mailto:corentinwatthez@gmail.com">Email ↗</a></div>
+        <p class="copyright">© 2026 Corentin Watthez</p>
+    </footer>
+</body>
+
+</html>

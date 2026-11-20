@@ -610,10 +610,12 @@ footer h2 {
     var(--surface);
 }
 
-.reel-media video {
+.reel-media video,
+.reel-media iframe {
   width: 100%;
   height: 100%;
   display: block;
+  border: 0;
   object-fit: cover;
 }
 
@@ -627,6 +629,8 @@ footer h2 {
   background: rgba(10, 13, 16, .72);
   color: var(--text);
   backdrop-filter: blur(3px);
+  /* the reel is a YouTube player now - let clicks reach its controls underneath */
+  pointer-events: none;
 }
 
 .reel-media .media-label {
