@@ -65,6 +65,17 @@
     font-weight: 500;
 }
 
+.case-meta a {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
+}
+
+.case-meta a:hover,
+.case-meta a:focus-visible {
+    color: var(--accent);
+}
+
 .case-hero-video {
     position: relative;
 
